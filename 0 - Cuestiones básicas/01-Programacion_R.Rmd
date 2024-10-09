@@ -1,0 +1,202 @@
+---
+title: "Programación en R"
+subtitle: "Aprende R"
+author: "Xopre Rodríguez Gallego"
+date: "`r format(Sys.time(), '%d de %B de %Y')`"
+codification: "UTF-8"
+output:
+  rmdformats::material:
+    highlight: kate
+---
+
+# Introducción
+
+Este documento contiene ejemplos básicos comentados sobre cómo programar en R, desde la creación de variables hasta la visualización de datos. Está diseñado para ayudar a principiantes a entender la sintaxis y las estructuras comunes en R.
+
+# 1. Variables y Tipos de Datos
+
+```{r}
+# Asignación de variables
+x <- 10         # Un número entero
+y <- 3.14       # Un número decimal (tipo double)
+nombre <- "Juan" # Una cadena de texto (string)
+logico <- TRUE   # Un valor booleano (TRUE/FALSE)
+
+# Imprimir las variables
+print(x)
+print(y)
+print(nombre)
+print(logico)
+```
+
+**Comentario:** R usa el operador `<-` para asignar valores a variables, aunque también se puede usar `=`.
+
+# 2. Operaciones Básicas
+
+```{r}
+# Suma, resta, multiplicación, división
+a <- 5
+b <- 2
+
+suma <- a + b        # Suma
+resta <- a - b       # Resta
+multiplicacion <- a * b  # Multiplicación
+division <- a / b    # División
+
+# Operaciones con cadenas
+saludo <- paste("Hola", nombre) # Combina cadenas de texto
+
+# Imprimir resultados
+print(suma)
+print(resta)
+print(multiplicacion)
+print(division)
+print(saludo)
+```
+
+**Comentario:** `paste()` se utiliza para concatenar cadenas de texto.
+
+# 3. Estructuras de Control
+
+## 3.1 Condicionales (if/else)
+
+```{r}
+edad <- 18
+
+if (edad >= 18) {
+  print("Eres mayor de edad")
+} else {
+  print("Eres menor de edad")
+}
+```
+
+**Comentario:** La estructura `if/else` se utiliza para tomar decisiones en función de una condición.
+
+## 3.2 Bucles (
+
+### 3.3 for
+
+```{r}
+# Imprimir números del 1 al 5 usando un bucle for
+for (i in 1:5) {
+  print(i)
+}
+```
+
+**Comentario:** `for` se usa para repetir un bloque de código un número determinado de veces.
+
+### 3.4 while
+
+```{r}
+# Imprimir números del 1 al 5 usando un bucle while
+i <- 1
+while (i <= 5) {
+  print(i)
+  i <- i + 1
+}
+```
+
+**Comentario:** `while` se usa para repetir un bloque de código mientras se cumpla una condición.
+
+## 3.3 Funciones
+
+```{r}
+# Definir una función para calcular el cuadrado de un número
+cuadrado <- function(x) {
+  return(x^2)
+}
+
+# Llamar a la función
+resultado <- cuadrado(4)
+print(resultado)
+```
+
+**Comentario:** Las funciones en R se definen usando `function()` y se pueden devolver valores con `return()`.
+
+# 4. Manejo de Datos con data.frame
+
+```{r}
+# Crear un data frame
+datos <- data.frame(
+  nombre = c("Ana", "Luis", "Pedro"),
+  edad = c(23, 35, 28),
+  ciudad = c("Madrid", "Barcelona", "Valencia")
+)
+
+# Imprimir el data frame
+print(datos)
+
+# Acceder a una columna
+print(datos$nombre)
+
+# Filtrar filas
+print(datos[datos$edad > 25,])
+```
+
+**Comentario:** Los `data.frame` son estructuras de datos tabulares muy utilizadas en R.
+
+# 5. Visualización de Datos con ggplot2
+
+```{r, message=FALSE, warning=FALSE}
+# Instalar y cargar la librería ggplot2 (descomentar la línea si es necesario)
+# install.packages("ggplot2")
+library(ggplot2)
+
+# Crear un conjunto de datos de ejemplo
+df <- data.frame(
+  x = 1:10,
+  y = c(3, 5, 2, 8, 7, 6, 9, 4, 10, 5)
+)
+
+# Crear un gráfico de dispersión
+ggplot(df, aes(x = x, y = y)) +
+  geom_point() +
+  ggtitle("Gráfico de dispersión")
+```
+
+**Comentario:** La librería `ggplot2` se usa para crear gráficos de alta calidad de manera sencilla. Veremos ejemplos reales más adelante, pero si sientes curiosidad puedes mirar [aquí](https://r-graph-gallery.com/ggplot2-package.html).
+
+# Conclusión
+
+Este documento muestra algunos ejemplos básicos sobre cómo programar en R. A medida que adquieras más experiencia, puedes explorar funciones más avanzadas y bibliotecas especializadas en R para realizar análisis de datos más complejos.
+
+> **Nota adicional**: El 95% de este documento fue generado por ChatGPT. Del 5% restante, el 4% lo escribió GitHub Copilot.
+
+# Ejercicios
+
+A continuación se proponen algunos ejercicios para ganar soltura programando en R:
+
+## Múltiplos de 3 o 5
+
+Este es el problema 1 del [Proyecto Euler](https://projecteuler.net/archives). 
+
+Si listamos todos los números naturales menores que 10 que son múltiplos de 3 o 5, obtenemos 3, 5, 6 y 9. La suma de estos múltiplos es 23. Encuentra la suma de todos los múltiplos de 3 o 5 menores que 1000.
+
+```{r}
+# Escribe tu solución aquí
+```
+
+## Fibonacci
+
+Este es el problema 2 del [Proyecto Euler](https://projecteuler.net/archives).
+
+Cada nuevo término en la secuencia de Fibonacci se genera sumando los dos términos anteriores. Comenzando con 1 y 2, los primeros 10 términos serían:
+
+$$1, 2, 3, 5, 8, 13, 21, 34, 55, 89, ...$$
+
+Al considerar los términos en la secuencia de Fibonacci cuyos valores no exceden los cuatro millones, encuentra la suma de los términos pares.
+
+```{r}
+# Escribe tu solución aquí
+```
+
+## Palíndromos
+
+Este es el problema 4 del [Proyecto Euler](https://projecteuler.net/archives).
+
+Un palíndromo es un número que se lee igual al derecho y al revés. El número palíndromo más grande obtenido al multiplicar dos números de dos dígitos es 9009 = 91 × 99. Encuentra el palíndromo más grande obtenido al multiplicar dos números de tres dígitos.
+
+```{r}
+# Escribe tu solución aquí
+```
+

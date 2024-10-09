@@ -1,0 +1,107 @@
+---
+title: "RStudio y RMarkdown"
+subtitle: "Aprende R"
+author: "Xopre Rodríguez Gallego"
+date: "`r format(Sys.time(), '%d de %B de %Y')`"
+codification: "UTF-8"
+output:
+  rmdformats::material:
+    highlight: kate
+---
+
+# 1. Introducción a RStudio
+
+RStudio es un entorno de desarrollo integrado (IDE) diseñado específicamente para R. Proporciona una interfaz fácil de usar que facilita la programación, el análisis de datos, y la creación de documentos reproducibles.
+
+## 1.1. La Interfaz de RStudio
+
+La ventana principal de RStudio se divide en varios paneles clave:
+
+- **Panel de Scripts/Editor**: Es donde puedes escribir y editar tu código R o archivos `.Rmd`. Puedes crear múltiples scripts o documentos y alternar entre ellos mediante pestañas.
+- **Consola**: En este panel se ejecuta el código R. Puedes escribir comandos directamente o ejecutar bloques de código desde el editor.
+- **Entorno**: Aquí se muestran todas las variables, funciones y datasets que has cargado en tu sesión actual de R.
+- **Panel de Plots/Archivos/Help**: Este panel te muestra gráficos generados, te permite navegar por archivos en tu proyecto, y proporciona acceso a la documentación de R.
+
+### Interfaz de RStudio
+
+```{r, echo=FALSE, out.width='100%', fig.align='center', message=FALSE, warning=FALSE}
+# Aquí podrías insertar un ejemplo visual de la interfaz, pero en este caso, explicamos en texto.
+```
+
+# 2. ¿Qué es un archivo .Rmd?
+
+Los archivos `.Rmd` son documentos R Markdown, que permiten mezclar código R con texto, gráficos, y ecuaciones. Estos documentos son muy útiles para la creación de informes y análisis reproducibles. Un archivo `.Rmd` contiene:
+
+- **Bloques de texto**: Escritos en Markdown para documentar el análisis.
+- **Chunks de código**: Donde se escribe y ejecuta el código R.
+- **Resultados**: Que pueden incluir texto, gráficos o tablas.
+
+# 3. Cómo Crear y Ejecutar Archivos Rmd en RStudio
+
+### 3.1. Crear un Archivo .Rmd
+
+1. En RStudio, haz clic en `File > New File > R Markdown...`.
+2. En la ventana emergente, selecciona el formato de salida (HTML, PDF o Word) y proporciona un título y autor para el documento.
+3. Haz clic en `OK`, y RStudio creará un archivo `.Rmd` con una plantilla básica.
+
+### 3.2. Estructura de un Archivo .Rmd
+
+Un archivo `.Rmd` tiene tres secciones principales:
+
+- **Encabezado YAML**: Esta sección, entre las líneas de `---`, define el título, el autor, y el formato de salida (HTML, PDF, etc.).
+- **Texto en Markdown**: Se usa para escribir texto explicativo, listas, encabezados, etc. por medio de la sintaxis Markdown.
+- **Chunks de código**: Los chunks son bloques de código que se ejecutan en R y cuyos resultados pueden mostrarse en el documento.
+
+```{r, echo=TRUE}
+# Ejemplo de un chunk de código en Rmd
+summary(cars)
+```
+
+### 3.3. Ejecutar Chunks de Código
+
+Para ejecutar el código en un archivo `.Rmd`:
+- Puedes ejecutar cada chunk individualmente haciendo clic en el botón "Play" que aparece al lado de cada chunk.
+- También puedes compilar todo el documento en un archivo de salida (HTML, PDF o Word) haciendo clic en el botón `Knit` en la parte superior.
+
+# 4. Generación de Documentos en Diferentes Formatos
+
+Puedes generar diferentes tipos de salida a partir de un archivo `.Rmd`:
+
+- **HTML**: El formato más común, adecuado para compartir documentos en línea.
+- **PDF**: Necesitas tener LaTeX instalado para generar PDFs desde R Markdown.
+- **Word**: Para generar informes que se puedan abrir y editar en Microsoft Word.
+
+Para seleccionar el formato, modifica el encabezado YAML en la parte superior del archivo `.Rmd`:
+
+```yaml
+---
+title: "Mi Informe"
+author: "Autor"
+output: html_document
+---
+```
+
+# 5. Ejemplo de Documento R Markdown
+
+Aquí te dejo un ejemplo sencillo de un documento `.Rmd` con código y visualizaciones:
+
+```{r}
+# Cargar un conjunto de datos y mostrar un resumen
+data(mtcars)
+summary(mtcars)
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+# Instalar y cargar ggplot2 si es necesario (descomentar la línea siguiente)
+# install.packages("ggplot2")
+library(ggplot2)
+
+# Crear un gráfico de dispersión
+ggplot(mtcars, aes(x = mpg, y = hp)) +
+  geom_point() +
+  ggtitle("Relación entre MPG y HP")
+```
+
+# 6. Conclusión
+
+RStudio y los archivos `.Rmd` ofrecen una poderosa combinación para crear análisis reproducibles y compartir informes interactivos con gráficos y resultados. Esta guía proporciona los fundamentos para comenzar a trabajar con la interfaz de RStudio y crear tus primeros documentos R Markdown.
