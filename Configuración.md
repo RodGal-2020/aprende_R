@@ -1,3 +1,8 @@
+---
+output:
+  html_document: default
+  pdf_document: default
+---
 # Configuración del entorno de trabajo
 
 ## Git
@@ -10,8 +15,6 @@
 
 1. Descarga [R](https://cran.r-project.org/bin/windows/base/).
 2. Descarga [Rstudio](https://posit.co/download/rstudio-desktop/).
-3. Lanza `install.packages("usethis")`.
-4. Lanza `usethis`.
 
 ## GitHub Desktop
 
