@@ -1,0 +1,200 @@
+---
+title: "Tidyverse"
+subtitle: "Aprende R"
+author: "Xopre Rodríguez Gallego"
+date: "`r format(Sys.time(), '%d de %B de %Y')`"
+codification: "UTF-8"
+output:
+  rmdformats::material:
+    highlight: kate
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Introducción
+
+En todos los casos será necesario lanzar la siguiente orden antes de nada:
+
+```{r}
+library(tidyverse)
+```
+
+# El operador tubería (`%>%`)
+
+El operador tubería (`%>%`) es un operador binario que permite encadenar funciones, de forma que el resultado de la función anterior se convierte en el primer argumento de la siguiente función.
+
+Podemos ver un ejemplo como sigue:
+
+```{r}
+# Creamos un vector
+vec <- 1:5
+
+# La versión original sería
+sqrt(sum(vec))
+
+# Si queremos emplear el operador tubería
+vec %>%
+  sum() %>%
+  sqrt()
+```
+
+En general, todas las funciones del entorno `tidyverse` están diseñadas para trabajar con el operador tubería.
+
+# `readr`
+
+> **Resumen**: Con este paquete es posible leer archivos de texto plano, como CSV, TSV, o archivos de ancho fijo, de forma rápida y eficiente, guardándolos como `tibble`.
+
+Vamos a continuación a leer un archivo `nombre.csv` usando `tidyverse`:
+
+```{r, eval = FALSE}
+# Leemos el archivo
+datos <- read_csv("nombre.csv")
+
+# Y mostramos los datos
+datos
+```
+
+Al igual que `read_csv()`, en `readr` nos podemos encontrar con muchas otras funciones `read_*()` para diferentes formatos.
+
+> **Nota**: Puede ser útil emplear la función `here()` del paquete `here` para ubicar rápidamente tu archivo.
+
+# `tidyr`
+
+> **Resumen**: Con este paquete es posible ajustar los datos para que cumplan las condiciones de ordenado (*tidy*), es decir, que cada variable tenga su propia columna, cada observación tenga su propia fila, y cada valor tenga su propia celda.
+
+- [Hoja de referencia (*cheatsheet*)](https://raw.githubusercontent.com/rstudio/cheatsheets/main/tidyr.pdf)
+
+# `dplyr`
+
+> **Resumen**: Con este paquete es posible realizar operaciones de filtrado, selección, ordenación, agrupación, y resumen de datos, de forma rápida y eficiente.
+
+- [Hoja de referencia (*cheatsheet*)](https://raw.githubusercontent.com/rstudio/cheatsheets/main/tidyr.pdf)
+
+Veamos a continuación algunos ejemplos, recurriendo al conjunto de datos `iris`:
+
+```{r}
+Data = iris
+```
+
+## Filtrado
+
+```{r}
+Data %>% 
+  filter(Species == "setosa")
+```
+
+```{r}
+Data %>% 
+  filter(Species == "setosa" & Sepal.Length > 5)
+```
+
+## Selección
+
+```{r}
+Data %>% 
+  select(Species, Sepal.Length)
+```
+
+También puede ser negativa:
+
+```{r}
+Data %>% 
+  select(-Species, -Sepal.Length)
+
+# Análogo a
+Data %>% 
+  select(-c(Species, Sepal.Length))
+```
+
+## Ordenación
+
+```{r}
+Data %>% 
+  arrange(Sepal.Length)
+```
+
+También podemos reordenar las columnas con `relocate()`, aunque esto no suele ser necesario:
+
+```{r}
+Data %>% 
+  relocate(Species, Sepal.Length)
+```
+
+## Agrupación
+
+```{r}
+Data %>% 
+  group_by(Species)
+```
+
+Desde ahora, todas las operaciones se realizarán sobre cada grupo, veamos un ejemplo con `slice_max()`, primero sin agrupar y luego agrupando:
+
+```{r}
+Data %>% 
+  slice_max(Sepal.Length)
+```
+
+```{r}
+Data %>% 
+  group_by(Species) %>% 
+  slice_max(Sepal.Length)
+```
+
+### Resumen
+
+Una operación especialmente interesante es la de resumen, que nos permite obtener valores agregados de las columnas:
+
+```{r}
+Data %>%
+  summarise(mean(Sepal.Length))
+```
+
+Así mola, pero al emplear `group_by()` podemos obtener resultados muuucho más interesantes.
+
+```{r}
+Data %>% 
+  group_by(Species) %>% 
+  summarise(mean(Sepal.Length))
+```
+
+## Mutación/Valores derivados
+
+# Ejercicios
+
+Recurriendo a los paquetes mencionados, realiza las siguientes operaciones:
+
+- Lee tu conjunto de datos como un `tibble`, recurriendo al paquete `readr`, y posiblemente a alguna de las funciones `read_*()`.
+- Visualiza los datos con las siguientes funciones:
+  - `head()`
+  - `glimpse()`
+  - `summary()`
+- Comprueba si tu conjunto de datos verifica las condiciones sobre datos ordenados (*tidy*), o si es necesario recurrir al paquete `tidyr` para ajustarlo. Recuerda que las condiciones para que una tabla se considere ordenada son las siguientes:
+  - Cada variable debe tener su propia columna (*each variable must have its own column*).
+  - Cada observación debe tener su propia fila (*each observation must have its own row*).
+  - Cada valor debe tener su propia celda (*each value must have its own cell*).
+- Recurriendo a `dplyr`, realiza las siguientes operaciones:
+  - Filtra las observaciones que cumplan una condición.
+  - Selecciona las columnas que te interesen.
+  - Ordena las observaciones según una o varias columnas.
+  - Agrupa las observaciones según una o varias columnas.
+    - Emplea la función `summarize()` sobre el conjunto de datos agrupados.
+  - Obtén valores derivados con `mutate()`, tales como:
+    - Diferencias entre columnas.
+  
+## Ejercicios avanzados
+
+Recurriendo a cualquiera de los siguientes recursos obtén una o más representaciones de una o más variables de tu conjunto de datos, recurriendo al paquete `ggplot2`:
+
+- Una IA.
+- [La hoja de referencia de ggplot2](https://raw.githubusercontent.com/rstudio/cheatsheets/main/data-visualization-2.1.pdf).
+- [Estos ejemplos de representaciones](https://r-graph-gallery.com/ggplot2-package.html)
+  
+En la próxima sesión veremos cómo se puede emplear en profundidad este paquete para obtener visualizaciones **alucinantes**.  
+  
+# Paquetes relacionados
+
+## `magrittr`
+
+Al final no lo usaremos al estar dentro de `dplyr` el operador tubería (`%>%`).

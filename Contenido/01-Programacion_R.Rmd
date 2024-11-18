@@ -17,34 +17,34 @@ Este documento contiene ejemplos básicos comentados sobre cómo programar en R,
 
 ```{r}
 # Asignación de variables
-x <- 10         # Un número entero
-y <- 3.14       # Un número decimal (tipo double)
-nombre <- "Juan" # Una cadena de texto (string)
-logico <- TRUE   # Un valor booleano (TRUE/FALSE)
+x = 10         # Un número entero
+y = 3.14       # Un número decimal (tipo double)
+nombre = "Juan" # Una cadena de texto (string)
+logico = TRUE   # Un valor booleano (TRUE/FALSE)
 
 # Imprimir las variables
-print(x)
 print(y)
+print(x)
 print(nombre)
 print(logico)
 ```
 
-**Comentario:** R usa el operador `<-` para asignar valores a variables, aunque también se puede usar `=`.
+**Comentario:** R usa el operador `=` para asignar valores a variables, aunque también se puede usar `=`.
 
 # 2. Operaciones Básicas
 
 ```{r}
 # Suma, resta, multiplicación, división
-a <- 5
-b <- 2
+a = 5
+b = 2
 
-suma <- a + b        # Suma
-resta <- a - b       # Resta
-multiplicacion <- a * b  # Multiplicación
-division <- a / b    # División
+suma = a + b        # Suma
+resta = a - b       # Resta
+multiplicacion = a * b  # Multiplicación
+division = a / b    # División
 
 # Operaciones con cadenas
-saludo <- paste("Hola", nombre) # Combina cadenas de texto
+saludo = paste("Hola", nombre) # Combina cadenas de texto
 
 # Imprimir resultados
 print(suma)
@@ -61,7 +61,7 @@ print(saludo)
 ## 3.1 Condicionales (if/else)
 
 ```{r}
-edad <- 18
+edad = 18
 
 if (edad >= 18) {
   print("Eres mayor de edad")
@@ -89,10 +89,10 @@ for (i in 1:5) {
 
 ```{r}
 # Imprimir números del 1 al 5 usando un bucle while
-i <- 1
+i = 1
 while (i <= 5) {
   print(i)
-  i <- i + 1
+  i = i + 1
 }
 ```
 
@@ -102,12 +102,12 @@ while (i <= 5) {
 
 ```{r}
 # Definir una función para calcular el cuadrado de un número
-cuadrado <- function(x) {
+cuadrado = function(x) {
   return(x^2)
 }
 
 # Llamar a la función
-resultado <- cuadrado(4)
+resultado = cuadrado(4)
 print(resultado)
 ```
 
@@ -117,7 +117,7 @@ print(resultado)
 
 ```{r}
 # Crear un data frame
-datos <- data.frame(
+datos = data.frame(
   nombre = c("Ana", "Luis", "Pedro"),
   edad = c(23, 35, 28),
   ciudad = c("Madrid", "Barcelona", "Valencia")
@@ -143,7 +143,7 @@ print(datos[datos$edad > 25,])
 library(ggplot2)
 
 # Crear un conjunto de datos de ejemplo
-df <- data.frame(
+df = data.frame(
   x = 1:10,
   y = c(3, 5, 2, 8, 7, 6, 9, 4, 10, 5)
 )
