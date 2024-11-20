@@ -161,6 +161,19 @@ Data %>%
 
 ## Mutación/Valores derivados
 
+Usamos `mutate()` para obtener valores derivados, como diferencias entre columnas:
+
+```{r}
+Data %>% 
+  mutate(Sepal.Width - Sepal.Length)
+```
+
+```{r}
+Data %>% 
+  mutate(Diferencia = Sepal.Width - Sepal.Length)
+```
+
+
 # Ejercicios
 
 Recurriendo a los paquetes mencionados, realiza las siguientes operaciones:
@@ -192,6 +205,20 @@ Recurriendo a cualquiera de los siguientes recursos obtén una o más representa
 - [Estos ejemplos de representaciones](https://r-graph-gallery.com/ggplot2-package.html)
   
 En la próxima sesión veremos cómo se puede emplear en profundidad este paquete para obtener visualizaciones **alucinantes**.  
+  
+Veamos un ejemplo de ggplot2 combinado con el uso de filter y summarise de dplyr:
+
+```{r}
+Data %>%
+  # Quiero que la especie sea un factor
+  mutate(Species = as.factor(Species)) %>%
+  # filter(Species == "setosa") %>% 
+  group_by(Species) %>% 
+  summarise(mean(Sepal.Length)) %>% 
+  ggplot(aes(x = Species, y = `mean(Sepal.Length)`)) +
+  geom_col()
+```
+
   
 # Paquetes relacionados
 

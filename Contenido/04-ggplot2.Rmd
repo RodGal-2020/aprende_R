@@ -1,0 +1,230 @@
+---
+title: "ggplot2"
+subtitle: "Aprende R"
+author: "Xopre Rodríguez Gallego"
+date: "`r format(Sys.time(), '%d de %B de %Y')`"
+codification: "UTF-8"
+output:
+  # Cambia los comentarios si quieres usar el otro formato
+  # rmdformats::material:
+  #   highlight: kate
+  ioslides_presentation:
+    widescreen: true # Wider form factor
+    transition: slower # default
+    notes: true # Show notes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Introducción
+
+## Visualización de Datos con ggplot2
+
+En este caso buscamos aprender a visualizar datos de forma efectiva y atractiva, recurriendo al paquete `ggplot2`.
+
+```{r, message=FALSE, echo=FALSE, warning=FALSE}
+library(tidyverse)
+library(ggplot2)
+```
+
+## Visualización sin `ggplot2`
+
+```{r}
+head(iris)
+```
+
+## Visualización sin `ggplot2`
+
+```{r}
+summary(iris)
+```
+
+## Visualización sin `ggplot2`
+
+```{r}
+glimpse(iris)
+```
+
+## Visualización sin `ggplot2`
+
+```{r}
+plot(iris)
+```
+
+## Visualización sin `ggplot2`
+
+```{r}
+plot(iris$Sepal.Length, iris$Sepal.Width, col=iris$Species)
+```
+
+## Visualización sin `ggplot2`
+
+```{r}
+glimpse(iris)
+```
+
+## Visualización sin `ggplot2` - Otros
+
+```{r, eval=FALSE}
+skimr::skim(iris)
+```
+
+# *The Grammar of Graphics*
+
+## *The Grammar of Graphics*
+
+Vamos construyendo capa a capa. Veremos un ejemplo en las siguientes diapositivas.
+
+Nótese que en `ggplot2` sustituimos el operador tubería (`%>%`) por el operador `+`.
+
+## Capa 01
+
+```{r}
+ggplot(data = iris)
+```
+
+## Capa 02
+
+```{r}
+ggplot(data = iris) +
+  geom_point(aes(x = Sepal.Length, y = Sepal.Width))
+```
+
+## Capa 03
+
+```{r}
+ggplot(data = iris) +
+  geom_point(aes(x = Sepal.Length, y = Sepal.Width, color = Species)) +
+  theme_minimal()
+```
+
+## Capa 04
+
+```{r}
+ggplot(data = iris) +
+  geom_point(aes(x = Sepal.Length, y = Sepal.Width, color = Species)) +
+  theme_minimal() +
+  labs(title = "Relación entre Longitud y Ancho del Sépalo")
+```
+
+## *The Grammar of Graphics*
+
+Como hemos podido ver, con cada nueva capa hemos incluido más y más elementos. Se asemeja a la forma de trabajar en Matlab, pero en líneas generales es un poco más ordenada.
+
+# Ejercicios
+
+## Ejercicios
+
+A continuación se proponen algunos ejercicios con `ggplot2`, pensados para aparecer en varias diapositivas, y poder hacer luego una breve presentación con los gráficos obtenidos, indicando el significado de cada uno.
+
+> **Nota**: Lo ideal es que no uséis demasiado vuestras IAs en estos apartados, dado que el objetivo es practicar la visualización **artesanal** de datos con `ggplot2`.
+
+**Ayudas**:
+
+- La ayuda desde RStudio, a la derecha del editor.
+- La [documentación de `ggplot2`](https://ggplot2.tidyverse.org/index.html), en español.
+- La [hoja de referencia (*cheatsheet*) de `ggplot2`](https://rstudio.github.io/cheatsheets/html/data-visualization.html), a la derecha en el enlace, en varios idiomas.
+
+## Preparación
+
+Empezamos cargando los datos con el paquete `readr`, como ya vimos:
+
+```{r}
+Data = iris # FIXME: Cambiar por tus datos
+```
+
+## Visualización sin `ggplot2`
+
+> **Enunciado**: Emplea una de las funciones que hemos visto anteriormente para mostrar un resumen de los datos.
+
+```{r}
+
+```
+
+## Diagrama de dispersión
+
+> **Enunciado**: Emplea `geom_point()` para crear un diagrama de dispersión con los datos de `Data`.
+
+```{r}
+
+```
+
+## Diagrama de dispersión mejorado
+
+> **Enunciado**: Modifica el gráfico anterior para que los puntos se coloreen según la especie de flor. Incluye, además, una leyenda, y modifica el tamaño de los puntos y la escala de los ejes.
+
+```{r}
+
+```
+
+## Diagrama de barras
+
+> **Enunciado**: Crea un diagrama de barras con los valores de una variable categórica de `Data`.
+
+```{r}
+
+```
+
+## Tartáfico (gráfico circular)
+
+> **Enunciado**: Crea un gráfico circular con los valores de una variable categórica de `Data`. 
+
+```{r}
+
+```
+
+## Histograma
+
+> **Enunciado**: Crea un histograma con los valores de una variable numérica de `Data`.
+
+```{r}
+
+```
+
+# Ejercicios avanzados
+
+## Ejercicios avanzados
+
+Incluyo esta sección para que veáis realmente todo el jugo que se le puede sacar a `ggplot2`.
+
+## Facetas
+
+Las facetas son una forma de dividir un gráfico en subgráficos, según los valores de una variable categórica. Nos permiten hacer representaciones que habitualmente son **una locura**.
+
+> **Enunciado**: Intenta usar la función `facet_wrap()` para dividir un gráfico en subgráficos según los valores de una variable categórica.
+
+```{r}
+
+```
+
+## Combinándolo con `dplyr`
+
+```{r, message=FALSE, warning=FALSE}
+library(dplyr)
+```
+
+## Ejercicio final
+
+> **Enunciado**: Toma uno de los gráficos que hayas tomado y pregúntale a tu IA favorita formas de mejorarlo. Incluye a continuación tu código. ¿Qué ha hecho? ¿Lo ha hecho bien? ¿Se te ocurre alguna forma de mejorarlo?
+
+```{r}
+
+```
+
+
+# Notas sobre el formato del archivo
+
+## IOSlides
+
+Este archivo está en formato `ioslides`, que es un formato de presentación de R Markdown. Puedes cambiar el formato en el encabezado YAML, por ejemplo, a `html_document` para obtener un documento HTML.
+
+La ventaja de emplear `ioslides` es que puedes crear presentaciones interactivas y dinámicas, con la posibilidad de incluir gráficos, tablas y código ejecutable.
+
+También admite comentarios para el orador, como aparecen justo a continuación. Para activarlo, simplemente añade `notes: true` en el encabezado YAML. Luego, si accedes desde el navegador, tienes que pulsar la tecla `p` para ver las notas, y posiblemente tengas que añadir `?presentme=true` a la URL.
+
+<div class="notes">
+Esto es una nota para el orador. Puedes añadir información adicional aquí.
+</div>
+
