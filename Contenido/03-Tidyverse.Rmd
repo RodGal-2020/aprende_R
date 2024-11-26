@@ -70,7 +70,7 @@ Al igual que `read_csv()`, en `readr` nos podemos encontrar con muchas otras fun
 
 > **Resumen**: Con este paquete es posible realizar operaciones de filtrado, selección, ordenación, agrupación, y resumen de datos, de forma rápida y eficiente.
 
-- [Hoja de referencia (*cheatsheet*)](https://raw.githubusercontent.com/rstudio/cheatsheets/main/tidyr.pdf)
+- [Hoja de referencia (*cheatsheet*)](https://nyu-cdsc.github.io/learningr/assets/data-transformation.pdf)
 
 Veamos a continuación algunos ejemplos, recurriendo al conjunto de datos `iris`:
 
