@@ -1,0 +1,35 @@
+---
+title: "Estadística"
+subtitle: "Aprende R"
+author: "Xopre Rodríguez Gallego"
+date: "`r format(Sys.time(), '%d de %B de %Y')`"
+codification: "UTF-8"
+output:
+  # Cambia los comentarios si quieres usar el otro formato
+  # rmdformats::material:
+  #   highlight: kate
+  ioslides_presentation:
+    widescreen: true # Wider form factor
+    transition: slower # default
+    notes: true # Show notes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Introducción
+
+## Introducción
+
+# Ejercicios
+
+## Ejercicios
+
+**Ayudas**:
+
+- La ayuda desde RStudio, a la derecha del editor.
+
+# Ejercicios avanzados
+
+## Ejercicios avanzados
