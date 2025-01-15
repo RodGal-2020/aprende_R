@@ -6,7 +6,8 @@ date: "`r format(Sys.time(), '%d de %B de %Y')`"
 codification: "UTF-8"
 output:
   # Cambia los comentarios si quieres usar otro formato
-  pdf_document
+  html_document
+  # pdf_document
   # rmdformats::material:
   #   highlight: kate
   # ioslides_presentation:
@@ -208,7 +209,7 @@ ggplot(iris, aes(x = Species, fill = Petal.Size.Category)) +
 
 ## Machine learning
 
-🆕 **Nuevo**, aunque realmente estaba dentro del proyecto:
+**Nuevo**, aunque realmente estaba dentro del proyecto:
 
 - *Búsqueda en rejilla*.
 - *Introducción al machine learning*.
