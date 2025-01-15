@@ -1,0 +1,406 @@
+---
+title: "Siguiente paso"
+subtitle: "Aprende R"
+author: "Xopre Rodríguez Gallego"
+date: "`r format(Sys.time(), '%d de %B de %Y')`"
+codification: "UTF-8"
+output:
+  # Cambia los comentarios si quieres usar otro formato
+  pdf_document
+  # rmdformats::material:
+  #   highlight: kate
+  # ioslides_presentation:
+  #   widescreen: true # Wider form factor
+  #   transition: slower # default
+  #   notes: true # Show notes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Opciones
+
+## Opciones
+
+Tenemos como opciones las siguientes:
+
+- algorítmica
+- estadística
+- *machine learning*
+
+# Algorítmica
+
+## Algorítmica
+
+Lo que originalmente estaba en el proyecto, e incluía las siguientes opciones:
+
+- *Algoritmo de bisección*.
+- *Algoritmo de Newton*.
+
+## Ejemplo
+
+Implementación del algoritmo de Newton sobre el conjunto de datos iris para predecir la longitud del sépalo.
+
+```{r}
+# Cargar los datos
+Data = iris
+
+# Variable dependiente (Sepal.Length) y variables independientes
+y = Data$Sepal.Length
+X = as.matrix(cbind(1, Data$Sepal.Width, Data$Petal.Length, Data$Petal.Width)) # Agregar columna de unos para el intercepto
+```
+
+## Ejemplo
+
+```{r}
+# Función para calcular la matriz Hessiana
+hessian <- function(X, beta) {
+  return(t(X) %*% X)
+}
+
+# Función para calcular el gradiente
+gradient <- function(X, y, beta) {
+  return(t(X) %*% (X %*% beta - y))
+}
+```
+
+## Ejemplo
+
+```{r}
+# Algoritmo de Newton
+newton_method <- function(X, y, tol = 1e-6, max_iter = 100) {
+  # Inicializar los coeficientes beta
+  beta = matrix(0, ncol = 1, nrow = ncol(X))
+  
+  # Iteraciones
+  for (i in 1:max_iter) {
+    # Calcular gradiente y Hessiana
+    grad = gradient(X, y, beta)
+    hess = hessian(X, beta)
+    
+    # Actualizar beta usando el método de Newton
+    beta_new = beta - solve(hess) %*% grad
+    
+    # Revisar la convergencia
+    if (sum(abs(beta_new - beta)) < tol) {
+      cat("Convergencia alcanzada en la iteración:", i, "\n")
+      break
+    }
+    
+    # Actualizar beta
+    beta = beta_new
+  }
+  
+  # Retornar los coeficientes estimados
+  return(beta)
+}
+```
+
+## Ejemplo
+
+```{r}
+# Ejecutar el algoritmo
+coeficientes = newton_method(X, y)
+```
+
+## Ejemplo
+
+```{r}
+# Mostrar resultados
+print("Coeficientes estimados:")
+print(coeficientes)
+
+```
+
+# Estadística
+
+## Estadística
+
+Extensión o aplicación real de lo que habéis visto en clase.
+
+Habéis visto, por ejemplo, el uso del test Chi-cuadrado o el test T de student, y puede ser interesante ver cómo compaginar dichas pruebas estadísticas con gráficos o con tests más avanzados.
+
+## Ejemplo
+
+Determinar si existen diferencias significativas en el tamaño del pétalo entre las especies de flores (setosa, versicolor, virginica) usando:
+
+- Test T de Student para comparar pares de especies.
+- Test Chi-cuadrado para evaluar la relación entre especies y categorías de tamaño del pétalo.
+
+## Ejemplo
+
+```{r}
+# Dividir las especies
+setosa = iris[iris$Species == "setosa", ]
+versicolor = iris[iris$Species == "versicolor", ]
+virginica = iris[iris$Species == "virginica", ]
+
+# Visualizar la distribución del tamaño del pétalo
+library(ggplot2)
+ggplot(iris, aes(x = Petal.Length, fill = Species)) +
+  geom_histogram(bins = 20, alpha = 0.6, position = "identity") +
+  labs(title = "Distribución del tamaño del pétalo por especie",
+       x = "Tamaño del pétalo", y = "Frecuencia") +
+  theme_minimal()
+```
+
+## Ejemplo
+
+1. Test T de Student: Comparar especies de forma pareja
+H0: No hay diferencia significativa en el tamaño del pétalo entre las especies.
+
+```{r}
+(t_test_setosa_versicolor = t.test(setosa$Petal.Length, versicolor$Petal.Length))
+(t_test_versicolor_virginica = t.test(versicolor$Petal.Length, virginica$Petal.Length))
+(t_test_setosa_virginica = t.test(setosa$Petal.Length, virginica$Petal.Length))
+```
+
+## Ejemplo
+
+2. Test Chi-cuadrado: Relación entre especies y categorías de tamaño del pétalo
+Crear categorías del tamaño del pétalo
+
+```{r}
+iris$Petal.Size.Category = cut(iris$Petal.Length,
+                               breaks = c(0, 2, 4, 6, Inf),
+                               labels = c("Pequeño", "Mediano", "Grande", "Muy grande"))
+
+# Tabla de contingencia
+tabla_contingencia = table(iris$Species, iris$Petal.Size.Category)
+```
+
+## Ejemplo
+
+```{r}
+# Realizar test Chi-cuadrado
+chi_test = chisq.test(tabla_contingencia)
+
+# Mostrar resultados
+cat("\nTabla de contingencia:\n")
+print(tabla_contingencia)
+chi_test
+```
+
+## Ejemplo
+
+3. Visualizar la relación entre las categorías de tamaño y las especies
+
+```{r, eval=FALSE}
+ggplot(iris, aes(x = Species, fill = Petal.Size.Category)) +
+  geom_bar(position = "fill") +
+  labs(title = "Proporción de categorías de tamaño del pétalo por especie",
+       x = "Especie", y = "Proporción") +
+  theme_minimal()
+```
+
+## Ejemplo
+
+```{r, echo=FALSE}
+ggplot(iris, aes(x = Species, fill = Petal.Size.Category)) +
+  geom_bar(position = "fill") +
+  labs(title = "Proporción de categorías de tamaño del pétalo por especie",
+       x = "Especie", y = "Proporción") +
+  theme_minimal()
+```
+
+# Machine learning
+
+## Machine learning
+
+🆕 **Nuevo**, aunque realmente estaba dentro del proyecto:
+
+- *Búsqueda en rejilla*.
+- *Introducción al machine learning*.
+
+## Ejemplo
+
+Usaremos ML para predecir la especie a partir de las otras variables:
+
+## Cargar librerías y datos
+
+```{r}
+# Cargar librerías necesarias
+library(randomForest)
+library(caret)  # Para particionar datos y evaluación de modelos
+library(pROC)   # Para la curva ROC
+library(nnet)   # Para regresión logística multinomial
+
+# Cargar el conjunto de datos
+data(iris)
+
+# Dividir los datos en entrenamiento (70%) y prueba (30%)
+set.seed(123)
+train_index <- createDataPartition(iris$Species, p = 0.7, list = FALSE)
+train_data <- iris[train_index, ]
+test_data <- iris[-train_index, ]
+```
+
+## Modelo Random Forest
+
+```{r}
+# Entrenar el modelo Random Forest
+rf_model <- randomForest(Species ~ ., data = train_data, importance = TRUE, ntree = 100)
+
+# Predicciones en el conjunto de prueba
+rf_predictions <- predict(rf_model, test_data)
+
+# Evaluar el modelo Random Forest
+confusion_rf <- confusionMatrix(rf_predictions, test_data$Species)
+cat("Matriz de Confusión para Random Forest:\n")
+print(confusion_rf)
+
+# Importancia de las variables
+cat("\nImportancia de las variables (Random Forest):\n")
+print(importance(rf_model))
+```
+
+## Modelo logístico
+
+```{r}
+# Entrenar el modelo logístico multinomial
+logistic_model <- multinom(Species ~ ., data = train_data)
+
+# Predicciones en el conjunto de prueba
+logistic_predictions <- predict(logistic_model, test_data)
+
+# Evaluar el modelo logístico
+confusion_logistic <- confusionMatrix(logistic_predictions, test_data$Species)
+cat("\nMatriz de Confusión para el Modelo Logístico:\n")
+print(confusion_logistic)
+```
+
+## Curvas ROC
+
+```{r}
+# Curva ROC para Random Forest y Regresión Logística
+rf_prob <- predict(rf_model, test_data, type = "prob")
+logistic_prob <- predict(logistic_model, test_data, type = "probs")
+
+# Calcular las curvas ROC para cada especie (multiclase)
+cat("\nCurvas ROC para Random Forest y Regresión Logística:\n")
+for (i in levels(test_data$Species)) {
+  # Random Forest
+  roc_rf <- roc(ifelse(test_data$Species == i, 1, 0), rf_prob[, i], levels = c(0, 1), direction = "<")
+  auc_rf <- auc(roc_rf)
+  cat("AUC para Random Forest (especie:", i, "):", auc_rf, "\n")
+  
+  # Modelo Logístico
+  roc_log <- roc(ifelse(test_data$Species == i, 1, 0), logistic_prob[, i], levels = c(0, 1), direction = "<")
+  auc_log <- auc(roc_log)
+  cat("AUC para Modelo Logístico (especie:", i, "):", auc_log, "\n")
+}
+```
+
+## Otros resultados
+
+```{r}
+# Cargar librerías necesarias
+library(randomForest)
+library(caret)
+library(ggplot2)
+
+# Cargar los datos y dividirlos en entrenamiento y prueba
+data(iris)
+set.seed(123)
+train_index <- createDataPartition(iris$Species, p = 0.7, list = FALSE)
+train_data <- iris[train_index, ]
+test_data <- iris[-train_index, ]
+```
+
+## Otros resultados
+
+```{r}
+# Entrenar el modelo Random Forest
+rf_model <- randomForest(Species ~ ., data = train_data, importance = TRUE, ntree = 100)
+
+# Predicciones en el conjunto de prueba
+rf_predictions <- predict(rf_model, test_data)
+```
+
+## Otros resultados - Matriz de confusión
+
+```{r}
+# ----------------------------
+# 1. Visualización: Matriz de Confusión
+# ----------------------------
+# Crear la matriz de confusión
+confusion_rf <- confusionMatrix(rf_predictions, test_data$Species)
+
+# Extraer datos para un gráfico de calor
+confusion_matrix <- as.data.frame(confusion_rf$table)
+colnames(confusion_matrix) <- c("Predicción", "Real", "Frecuencia")
+```
+
+## Otros resultados - Matriz de confusión
+
+```{r, eval = FALSE}
+# Visualizar la matriz de confusión con ggplot2
+ggplot(confusion_matrix, aes(x = Real, y = Predicción, fill = Frecuencia)) +
+  geom_tile(color = "white") +
+  scale_fill_gradient(low = "white", high = "blue") +
+  labs(
+    title = "Matriz de Confusión - Random Forest",
+    x = "Etiqueta Real",
+    y = "Etiqueta Predicha"
+  ) +
+  theme_minimal()
+```
+
+## Otros resultados - Matriz de confusión
+
+```{r, echo = FALSE}
+# Visualizar la matriz de confusión con ggplot2
+ggplot(confusion_matrix, aes(x = Real, y = Predicción, fill = Frecuencia)) +
+  geom_tile(color = "white") +
+  scale_fill_gradient(low = "white", high = "blue") +
+  labs(
+    title = "Matriz de Confusión - Random Forest",
+    x = "Etiqueta Real",
+    y = "Etiqueta Predicha"
+  ) +
+  theme_minimal()
+```
+
+## Otros resultados - Error de clasificación
+
+```{r}
+# Extraer los errores del modelo Random Forest
+error_df <- data.frame(
+  Árbol = 1:length(rf_model$err.rate[, "OOB"]),
+  Error = rf_model$err.rate[, "OOB"]
+)
+```
+
+```{r eval = FALSE}
+# Visualizar el error fuera de bolsa (OOB) con ggplot2
+ggplot(error_df, aes(x = Árbol, y = Error)) +
+  geom_line(color = "red", size = 1) +
+  labs(
+    title = "Error de Clasificación vs Número de Árboles",
+    x = "Número de Árboles",
+    y = "Error de Clasificación (OOB)"
+  ) +
+  theme_minimal()
+```
+
+## Otros resultados - Error de clasificación
+
+```{r echo=FALSE}
+# Visualizar el error fuera de bolsa (OOB) con ggplot2
+ggplot(error_df, aes(x = Árbol, y = Error)) +
+  geom_line(color = "red", size = 1) +
+  labs(
+    title = "Error de Clasificación vs Número de Árboles",
+    x = "Número de Árboles",
+    y = "Error de Clasificación (OOB)"
+  ) +
+  theme_minimal()
+
+```
+
+# Resumen
+
+## Resumen
+
+**¿Qué queréis?**
