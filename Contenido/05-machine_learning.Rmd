@@ -5,13 +5,10 @@ author: "Xopre Rodríguez Gallego"
 date: "`r format(Sys.time(), '%d de %B de %Y')`"
 codification: "UTF-8"
 output:
-  # Cambia los comentarios si quieres usar el otro formato
-  # rmdformats::material:
-  #   highlight: kate
   ioslides_presentation:
-    widescreen: true # Wider form factor
-    transition: slower # default
-    notes: true # Show notes
+    widescreen: true
+    transition: slower
+    notes: true
 ---
 
 ```{r setup, include=FALSE}
@@ -22,14 +19,159 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Introducción
 
+El aprendizaje automático (Machine Learning) es un campo apasionante que combina estadísticas, computación y matemáticas para predecir patrones y extraer conocimiento útil de los datos. En este tutorial, exploraremos conceptos básicos usando el conjunto de datos `iris` y dos métodos: los modelos lineales y los splines.
+
+## ¿Qué es el *machine learning*?
+
+El *machine learning* es una rama de la inteligencia artificial que se enfoca en el desarrollo de algoritmos y modelos que permiten a las computadoras aprender a partir de los datos. Estos modelos pueden ser usados para hacer predicciones, clasificar datos, detectar patrones y mucho más.
+
+## Aprendizaje supervisado y no supervisado
+
+En el aprendizaje supervisado, los modelos se entrenan con datos etiquetados, es decir, datos que tienen una variable objetivo conocida. En el aprendizaje no supervisado, los modelos se entrenan con datos no etiquetados, es decir, datos que no tienen una variable objetivo.
+
+## Métricas de error
+
+Para evaluar el desempeño de los modelos, se utilizan diferentes métricas de error, como el error cuadrático medio, el error absoluto medio, la precisión, el *recall*, la *F1-score*, entre otros.
+
+Depende del problema y del tipo de datos cuál es la métrica más adecuada a utilizar. Categórico vs. Numérico.
+
+# Ejemplos de uso
+
+## Ejemplos de uso
+
+Los modelos de *machine learning* se utilizan en una amplia variedad de campos, como la medicina, la biología, la economía, la ingeniería, la meteorología, la robótica, la publicidad, el comercio electrónico, la seguridad, entre otros.
+
+- Predicción del confort térmico en exteriores.
+- Identificación de anomalías en una central eléctrica.
+- Predicción de la demanda de energía eléctrica.
+- Detección de enfermedades.
+- Análisis de sentimientos en redes sociales.
+
+# Modelos Lineales
+
+## Modelos Lineales
+
+Los modelos lineales son una herramienta fundamental en Machine Learning. Aquí, usaremos el conjunto de datos `iris` para predecir la longitud del sépalo (`Sepal.Length`) basado en las demás características.
+
+```{r linear-model, echo=TRUE, message=FALSE, warning=FALSE}
+# Cargar los datos
+data(iris)
+
+# Ajustar un modelo lineal
+modelo_lineal <- lm(Sepal.Length ~ Sepal.Width + Petal.Length + Petal.Width, data = iris)
+```
+
+## Modelos Lineales
+
+Podemos ver un resumen del modelo:
+
+```{r, echo=FALSE}
+summary(modelo_lineal)
+```
+
+## Modelos Lineales
+
+```{r, echo=FALSE}
+summary(modelo_lineal)
+```
+
+## Visualización del Modelo Lineal
+
+Es importante visualizar los resultados del modelo para comprender su desempeño.
+
+```{r plot-linear, eval=FALSE, message=FALSE, warning=FALSE}
+# Predicciones
+predicciones <- predict(modelo_lineal, iris)
+
+# Gráfico: valores reales vs predicciones
+plot(iris$Sepal.Length, predicciones, 
+     xlab = "Valores reales", ylab = "Predicciones",
+     main = "Modelo Lineal: Valores Reales vs Predicciones")
+abline(0, 1, col = "red")
+```
+
+## Visualización del Modelo Lineal
+
+```{r , echo=FALSE, message=FALSE, warning=FALSE}
+# Predicciones
+predicciones <- predict(modelo_lineal, iris)
+
+# Gráfico: valores reales vs predicciones
+plot(iris$Sepal.Length, predicciones, 
+     xlab = "Valores reales", ylab = "Predicciones",
+     main = "Modelo Lineal: Valores Reales vs Predicciones")
+abline(0, 1, col = "red")
+```
+
+# Splines
+
+## Splines
+
+Los splines permiten modelar relaciones no lineales entre las variables. Aquí los usaremos para explorar cómo se relaciona la longitud del sépalo (`Sepal.Length`) con la longitud del pétalo (`Petal.Length`).
+
+```{r splines, eval=FALSE, message=FALSE, warning=FALSE}
+library(splines)
+
+# Ajustar un modelo con splines
+modelo_splines <- lm(Sepal.Length ~ bs(Petal.Length, df = 4), data = iris)
+
+# Resumen del modelo
+summary(modelo_splines)
+```
+
+## Splines
+
+```{r , echo=FALSE, message=FALSE, warning=FALSE}
+library(splines)
+
+# Ajustar un modelo con splines
+modelo_splines <- lm(Sepal.Length ~ bs(Petal.Length, df = 4), data = iris)
+
+# Resumen del modelo
+summary(modelo_splines)
+```
+
+## Visualización de Splines
+
+Visualicemos cómo los splines capturan relaciones no lineales en los datos.
+
+```{r plot-splines, eval=FALSE, message=FALSE, warning=FALSE}
+# Crear datos para predicciones
+nuevos_datos <- data.frame(Petal.Length = seq(min(iris$Petal.Length), max(iris$Petal.Length), length.out = 100))
+nuevos_datos$prediccion <- predict(modelo_splines, nuevos_datos)
+
+# Gráfico
+plot(iris$Petal.Length, iris$Sepal.Length, 
+     xlab = "Longitud del Pétalo", ylab = "Longitud del Sépalo", 
+     main = "Modelo con Splines")
+lines(nuevos_datos$Petal.Length, nuevos_datos$prediccion, col = "blue", lwd = 2)
+```
+
+## Visualización de Splines
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+# Crear datos para predicciones
+nuevos_datos <- data.frame(Petal.Length = seq(min(iris$Petal.Length), max(iris$Petal.Length), length.out = 100))
+nuevos_datos$prediccion <- predict(modelo_splines, nuevos_datos)
+
+# Gráfico
+plot(iris$Petal.Length, iris$Sepal.Length, 
+     xlab = "Longitud del Pétalo", ylab = "Longitud del Sépalo", 
+     main = "Modelo con Splines")
+lines(nuevos_datos$Petal.Length, nuevos_datos$prediccion, col = "blue", lwd = 2)
+```
+
 # Ejercicios
 
 ## Ejercicios
 
-**Ayudas**:
+1. Ajusta un modelo lineal para predecir la anchura del sépalo (`Sepal.Width`) usando las demás variables.
+2. Experimenta con diferentes valores de grados de libertad (`df`) en el modelo de splines. ¿Cómo cambia el ajuste?
 
-- La ayuda desde RStudio, a la derecha del editor.
+# Ejercicios Avanzados
 
-# Ejercicios avanzados
+## Ejercicios Avanzados
 
-## Ejercicios avanzados
+1. Implementa validación cruzada para comparar el desempeño del modelo lineal y el modelo de splines.
+2. Obtén varias métricas de error, tales como el error cuadrático medio, para evaluar los modelos.
+3. Crea un gráfico interactivo usando el paquete `plotly` para explorar las predicciones del modelo de splines.

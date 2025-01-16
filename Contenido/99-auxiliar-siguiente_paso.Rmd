@@ -6,14 +6,14 @@ date: "`r format(Sys.time(), '%d de %B de %Y')`"
 codification: "UTF-8"
 output:
   # Cambia los comentarios si quieres usar otro formato
-  html_document
+  # html_document
   # pdf_document
   # rmdformats::material:
   #   highlight: kate
-  # ioslides_presentation:
-  #   widescreen: true # Wider form factor
-  #   transition: slower # default
-  #   notes: true # Show notes
+  ioslides_presentation:
+    widescreen: true # Wider form factor
+    transition: slower # default
+    notes: true # Show notes
 ---
 
 ```{r setup, include=FALSE}
