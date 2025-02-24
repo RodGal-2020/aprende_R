@@ -5,10 +5,12 @@ author: "Xopre Rodríguez Gallego"
 date: "`r format(Sys.time(), '%d de %B de %Y')`"
 codification: "UTF-8"
 output:
-  ioslides_presentation:
-    widescreen: true
-    transition: slower
-    notes: true
+  # ioslides_presentation:
+  #   widescreen: true
+  #   transition: slower
+  #   notes: true
+  rmdformats::material:
+    highlight: kate
 ---
 
 ```{r setup, include=FALSE}
@@ -46,6 +48,84 @@ Los modelos de *machine learning* se utilizan en una amplia variedad de campos, 
 - Predicción de la demanda de energía eléctrica.
 - Detección de enfermedades.
 - Análisis de sentimientos en redes sociales.
+
+# Conjuntos de datos
+
+## Conjuntos de datos
+
+En este caso vamos a ver algunos conjuntos de datos que pueden seros útiles, como alternativas a los datos que todavía podéis estar buscando. En concreto:
+
+- **iris** 🌸: Clasificación de flores (setosa, versicolor, virginica) con 4 características.
+- **palmerpenguins ** 🐧: Características de pingüinos de 3 especies.
+- **PlantGrowth** 🌱: Peso de plantas bajo diferentes tratamientos.
+- **ChickWeight** 🐣: Crecimiento de pollos con distintas dietas.
+- **esoph** 🍷: Relación entre alcohol/tabaco y cáncer de esófago.
+- **biocLite** (Bioconductor) 🧬: Datos genómicos y de expresión génica.
+
+Veremos ahora la cabecera de cada uno.
+
+## Instalación de paquetes
+
+Algunos de los conjuntos se encuentran en paquetes que no están instalados por defecto. Para instalarlos, podemos usar la función `renv::install()`.
+
+Aprovecho para mencionar que `BiocManager` es un paquete que nos permite instalar paquetes de datos genómicos, como `biocLite`.
+
+```{r eval = FALSE}
+renv::install("palmerpenguins")
+renv::install("BiocManager")
+BiocManager::install()
+# BiocManager::install("biocLite") # Esto es un poco diferente de lo habitual
+```
+
+## iris
+
+```{r}
+head(iris)
+```
+
+## palmerpenguins
+
+```{r}
+library(palmerpenguins)
+head(penguins)
+```
+
+## PlantGrowth
+
+```{r}
+head(PlantGrowth)
+```
+
+## ChickWeight
+
+```{r}
+head(ChickWeight)
+```
+
+## esoph
+
+```{r}
+head(esoph)
+```
+
+## BiocManager
+
+En teoría nos permite generar datos genómicos, pero no he podido pararme a ver cómo funciona.
+
+```{r eval = FALSE}
+library(BiocManager)
+BiocManager::install("airway") # Instalar y cargar paquete
+library(airway)
+
+data("airway") # Cargar dataset
+
+# Convertir a un data frame para ML
+df <- tibble::tibble(assay(airway))
+df$condition <- as.factor(airway$dex)  # Variable de clasificación
+
+head(df)
+```
+
 
 # Modelos Lineales
 
