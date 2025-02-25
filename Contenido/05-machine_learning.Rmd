@@ -15,6 +15,10 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+
+library(magrittr)
+library(ggplot2)
+library(dplyr)
 ```
 
 # Introducción
@@ -126,6 +130,19 @@ df$condition <- as.factor(airway$dex)  # Variable de clasificación
 head(df)
 ```
 
+# Objetivo del ML
+
+## Objetivo del ML
+
+Supervisado: predecir una variable objetivo a partir de un conjunto de características.
+
+No supervisado: encontrar patrones y estructuras en los datos.
+
+## Ejemplo
+
+Supervisado: tenemos un conjunto de datos con las características de diferentes flores y la longitud de su sépalo. Queremos predecir la longitud del sépalo basándonos en las demás características. Ejemplo: modelos lineal.
+
+No supervisado: tenemos un conjunto de datos con las características de diferentes flores, pero no tenemos una variable objetivo. Queremos agrupar las flores en diferentes categorías basándonos en sus características. Ejemplo: análisis de componentes principales (PCA).
 
 # Modelos Lineales
 
@@ -144,12 +161,6 @@ modelo_lineal <- lm(Sepal.Length ~ Sepal.Width + Petal.Length + Petal.Width, dat
 ## Modelos Lineales
 
 Podemos ver un resumen del modelo:
-
-```{r, echo=FALSE}
-summary(modelo_lineal)
-```
-
-## Modelos Lineales
 
 ```{r, echo=FALSE}
 summary(modelo_lineal)
@@ -181,6 +192,17 @@ plot(iris$Sepal.Length, predicciones,
      xlab = "Valores reales", ylab = "Predicciones",
      main = "Modelo Lineal: Valores Reales vs Predicciones")
 abline(0, 1, col = "red")
+```
+
+## Visualización del error
+
+```{r}
+# Gráfico: valores reales vs errores
+errores <- iris$Sepal.Length - predicciones
+plot(iris$Sepal.Length, errores, 
+     xlab = "Valores reales", ylab = "Errores",
+     main = "Modelo Lineal: Valores Reales vs Errores")
+abline(0, 0, col = "red")
 ```
 
 # Splines
@@ -239,6 +261,130 @@ plot(iris$Petal.Length, iris$Sepal.Length,
      xlab = "Longitud del Pétalo", ylab = "Longitud del Sépalo", 
      main = "Modelo con Splines")
 lines(nuevos_datos$Petal.Length, nuevos_datos$prediccion, col = "blue", lwd = 2)
+```
+
+# KNN
+
+## KNN
+
+Este modelo, el de los N vecinos más cercanos (K nearest neighbors), es un algoritmo de aprendizaje supervisado que se utiliza para **clasificación** y regresión. En este caso, vamos a usarlo para clasificar las flores del conjunto de datos `iris`.
+
+```{r}
+# Cargar el paquete
+library(class)
+
+# Ajustar el modelo
+modelo_knn <- knn(train = iris[, -5], test = iris[, -5], cl = iris$Species, k = 3)
+modelo_knn
+```
+
+## Visualización del error de clasificación
+
+Se usa prácticamente siempre una matriz de confusión:
+
+```{r}
+# Resultados
+table(modelo_knn, iris$Species)
+```
+
+## Visualización del error de clasificación
+
+Podemos visualizar dichos resultados de otras formas, empleando `geom_tile()`, por ejemplo.
+
+```{r}
+conf_matrix <- table(modelo_knn, iris$Species) %>% 
+  as.data.frame()
+
+ggplot(conf_matrix, aes(x = modelo_knn, y = Var2, fill = Freq)) +
+  geom_tile() +
+  geom_text(aes(label = Freq), vjust = 1) +
+  theme_minimal() +
+  labs(title = "Matriz de Confusión", x = "Predicción", y = "Real")
+```
+
+# Problema de unificación
+
+## Problema de unificación
+
+Hemos visto que estos paquetes, aunque compartan la idea que hay detrás, presentan una sintaxis básica muy diferente. Para evitar estas dificultades de propone emplear el paquete `tidymodels`, el equivalente de `tidyverse` para modelos predictivos.
+
+Sin `tidymodels` hemos empleado el siguiente código:
+
+```{r eval=FALSE}
+modelo_lineal <- lm(Sepal.Length ~ Sepal.Width + Petal.Length + Petal.Width, data = iris)
+modelo_splines <- lm(Sepal.Length ~ bs(Petal.Length, df = 4), data = iris)
+modelo_knn <- knn(train = iris[, -5], test = iris[, -5], cl = iris$Species, k = 3)
+```
+
+## Problema de unificación
+
+Con `tidymodels` emplearíamos el siguiente:
+
+```{r eval=FALSE}
+renv::install("tidymodels")
+renv::install("kknn") # Va aparte
+```
+
+
+```{r}
+library(tidymodels)
+
+## Selección de modelos
+# Crear un modelo lineal
+modelo_lineal <- linear_reg() %>%
+  set_engine("lm") %>%
+  set_mode("regression")
+
+# Crear un modelo con splines
+modelo_splines <- linear_reg() %>%
+  set_engine("lm") %>%
+  set_mode("regression") %>%
+  set_args(degree = 4)
+
+# Crear un modelo KNN
+modelo_knn <- nearest_neighbor(weight_func = "rectangular", neighbors = 3) %>%
+  set_engine("kknn") %>%
+  set_mode("regression") # 
+
+## Ajuste de modelos
+my_workflow = workflow(Sepal.Length ~ .)
+
+resultados = list()
+
+resultados$lineal = my_workflow %>% 
+  add_model(modelo_lineal) %>%
+  fit(data = iris)
+
+resultados$splines = my_workflow %>% 
+  add_model(modelo_splines) %>%
+  fit(data = iris)
+
+resultados$knn = my_workflow %>% 
+  add_model(modelo_knn) %>%
+  fit(data = iris)
+
+for (i in 1:length(resultados)) {
+  print(resultados[[i]])
+}
+```
+
+Ahora podríamos visualizar los resultados:
+
+```{r}
+graficas = list()
+
+## Predicciones
+for (i in seq_along(resultados)) { # 1:length(resultados)
+  predicciones <- predict(resultados[[i]], new_data = iris)
+  
+  iris %>% 
+    bind_cols(predicciones) %>% 
+    ggplot(aes(x = Sepal.Length, y = .pred)) +
+      geom_point() +
+      geom_abline(intercept = 0, slope = 1, color = "red") +
+      labs(title = paste("Modelo", i, ": Valores Reales vs Predicciones"),
+           x = "Valores Reales", y = "Predicciones")
+}
 ```
 
 # Ejercicios
