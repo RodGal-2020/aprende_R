@@ -1,0 +1,27 @@
+---
+title: "Proyecto_Redbull"
+author: "María Vázquez Jiménez"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+source(here("scripts/Tablas.R"))
+source(here("scripts/Graficas.R"))
+source(here("scripts/Modelos.R"))
+```
+
+## Modelos
+
+### Logístico
+
+```{r}
+grafica_logis
+```
+
+Podemos ver que...
+
+```{r}
+salida_modelos$logis$grafica
+```
+
