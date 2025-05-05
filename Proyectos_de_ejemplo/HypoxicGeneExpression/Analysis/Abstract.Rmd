@@ -1,0 +1,156 @@
+---
+title: "Abstract"
+author: "Jannik Hannemann"
+date: "2024-12-25"
+output:
+  ioslides_presentation:
+    widescreen: true 
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r include=FALSE}
+library(tidyverse)
+library(conflicted)
+library(ggplot2)
+library(MKinfer)
+library(formatR)
+conflicts_prefer(dplyr::filter)
+conflicts_prefer(dplyr::lag)
+```
+
+# Introduction
+
+Given a certain data set, existing of 4 different cell types, 9 different genes, 3 different experimental conditions and their measured CT values (in 6 instances), we are interested in the variance of the CT values for each gene depending on the different experimental conditions and the different cell lines. Like this, the scientist group can choose a gene from this experiment as their reference gene for the real time PCRs which have to be conducted in the future. This chosen gene should be a stable one and the science group can choose, whether they need a gene that is stable by the different cell lines or by the different experimental conditions.
+
+The Objective of this project in R is the graphical representation of these two variances for each gene in a scatter plot.
+
+# Editing the data
+## First edit of the data
+```{r}
+#read all data
+data <- read_csv2("GeneDataAllCellLinesNewFormat.csv")
+
+#change the variable names to a usable format in R
+names(data)<-str_replace_all(names(data), c(" " = "."))
+```
+## First overview of the data
+```{r}
+#show the mean of each gene in each cell line and experimental condition to get a first
+#overview
+data %>%
+  group_by(Cell.Line, Gene, Experimental.Condition) %>% 
+  summarise(mean(CT.Value, na.rm = TRUE))
+```
+## Retrieving data variances by cell line
+```{r}
+#get the data that is affected by the different cell lines
+varianceDataCellLine <- data %>%
+  #group the different "sets" of data
+  group_by(Cell.Line, Gene, Experimental.Condition) %>% 
+  #filter the data to only get the normoxic data, which means it will not be affected
+  #by the experimental condition
+  filter(Experimental.Condition == "24h NX") %>% 
+  #group the data by the different genes
+  group_by(Gene) %>% 
+  summarise(
+    #calculate the standard deviation of the CT values for each gene
+    standardDeviationByCellLine = sd(CT.Value, na.rm = TRUE), 
+    #calculate the mean of the CT values for each gene
+    meanByCellLine = mean(CT.Value, na.rm = TRUE), 
+    #calculate the coefficient of variation for each gene
+    coefficientOfVariationCellLine = standardDeviationByCellLine / meanByCellLine, 
+    #calculate the minimum of the confidence interval for the coefficient of variation
+    confIntMinCellLine = sdCI(CT.Value)$conf.int[1] / meanByCellLine, 
+    #calculate the maximum of the confidence interval for the coefficient of variation
+    confIntMaxCellLine = sdCI(CT.Value)$conf.int[2] / meanByCellLine 
+  )
+```
+## Retrieving data variances by experimental condition
+```{r}
+#get the data that is affected by the different Experimental Conditions
+varianceDataExpCond <- data %>%
+  #group the different "sets" of data
+  group_by(Cell.Line, Gene) %>% 
+  #first get the data in groups for each different cell line,
+  #because we want to clear out the effect of the different cell lines
+  mutate(
+    #calculate the standard deviation of the CT values for each gene and each cell line
+    standardDeviationByExpCond = sd(CT.Value, na.rm = TRUE), 
+    #calculate the mean of the CT values for each gene and each cell line
+    meanByExpCond = mean(CT.Value, na.rm = TRUE), 
+    #calculate the coefficient of variation for each gene and each cell line
+    coefficientOfVariationExpCond = standardDeviationByExpCond / meanByExpCond, 
+    #calculate the minimum of the confidence interval for the coefficient of variation
+    confIntMinExpCond = sdCI(CT.Value)$conf.int[1] / meanByExpCond, 
+    #calculate the maximum of the confidence interval for the coefficient of variation
+    confIntMaxExpCond = sdCI(CT.Value)$conf.int[2] / meanByExpCond 
+  ) %>% 
+  #group the data by the different genes to get the means of all the values
+  #for each gene (like this we clear out the effect of the different cell lines)
+  group_by(Gene) %>% 
+  summarise(
+    #calculate the mean of the coefficient of variation for each gene
+    coefficientOfVariationExpCond = mean(coefficientOfVariationExpCond, na.rm = TRUE), 
+    #calculate the minimum of the confidence interval for the coefficient of variation
+    confIntMinExpCond = mean(confIntMinExpCond, na.rm = TRUE), 
+    #calculate the maximum of the confidence interval for the coefficient of variation
+    confIntMaxExpCond = mean(confIntMaxExpCond, na.rm = TRUE) 
+  )
+```
+
+```{r echo=FALSE}
+varianceDataCellLine
+varianceDataExpCond
+
+```
+## Merge the data
+```{r}
+#group all import data in a tibble
+finalData <- merge(varianceDataCellLine, varianceDataExpCond, by = "Gene")
+finalData
+```
+## Plotting the raw data
+
+```{r}
+ggplot(data = finalData) +
+  aes(x = coefficientOfVariationExpCond, y = coefficientOfVariationCellLine, color = Gene) +
+  geom_point()
+```
+
+## Adding error bars
+
+```{r, echo=FALSE}
+ggplot(data = finalData) +
+  aes(x = coefficientOfVariationExpCond, y = coefficientOfVariationCellLine, color = Gene) +
+  geom_point() +
+  geom_errorbar(aes(xmin = confIntMinExpCond, xmax=confIntMaxExpCond), width=.01) +
+  geom_errorbar(aes(ymin = confIntMinCellLine, ymax=confIntMaxCellLine), width=.01)
+```
+
+
+## Optimizing the plot (error bars are too dense for a graphical representation)
+
+```{r, echo=FALSE}
+ggplot(data = finalData) +
+  aes(
+    x = coefficientOfVariationExpCond * 100,
+    y = coefficientOfVariationCellLine * 100,
+    color = Gene
+  ) +
+  geom_point() +
+  geom_text(label=finalData$Gene, hjust=0, vjust=0) +
+  lims(x = c(0, 7.5), y = c(0, 7.5)) +
+  #add a dashed line to show the 1:1 line.
+  #Any gene that is under this line means that the
+  #coefficient of variation of this gene is higher by
+  #the experimental conditions than by the cell lines
+  geom_abline(intercept = 0, slope = 1, color = "grey", linetype = "dashed") +
+  labs(
+    x = "The coefficient of variation by experimental conditions in %",
+    y = "The coefficient of variation by cell lines in %",
+    title = "Coefficient of variation of the CT-Values for the different analyzed genes"
+  )
+```
