@@ -1,11 +1,15 @@
 ---
-title: "Abstract"
+title: "Hypoxic Gene Expression"
 author: "Jannik Hannemann"
-date: "2024-12-25"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
   ioslides_presentation:
+    incremental: true
     widescreen: true 
+    logo: University-of-Seville.png
 ---
+
+\newpage
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -22,30 +26,33 @@ conflicts_prefer(dplyr::lag)
 ```
 
 # Introduction
-
-Given a certain data set, existing of 4 different cell types, 9 different genes, 3 different experimental conditions and their measured CT values (in 6 instances), we are interested in the variance of the CT values for each gene depending on the different experimental conditions and the different cell lines. Like this, the scientist group can choose a gene from this experiment as their reference gene for the real time PCRs which have to be conducted in the future. This chosen gene should be a stable one and the science group can choose, whether they need a gene that is stable by the different cell lines or by the different experimental conditions.
-
-The Objective of this project in R is the graphical representation of these two variances for each gene in a scatter plot.
+## Introduction
+- Selection of stably expressed reference genes is crucial for qRT-PCR
+- Proyects objective is finding the most stable genes and distinguishing the influence of cell lines and experimental conditions
+- Dataset of CT values from 4 cell lines, 9 genes, and 3 experimental conditions
+- Final objective: Graphical representation of variances in CT values for each gene based on cell lines and experimental conditions
 
 # Editing the data
 ## First edit of the data
-```{r}
+```{r message=FALSE}
 #read all data
 data <- read_csv2("GeneDataAllCellLinesNewFormat.csv")
 
 #change the variable names to a usable format in R
 names(data)<-str_replace_all(names(data), c(" " = "."))
+print(data, n=6)
 ```
 ## First overview of the data
-```{r}
+```{r message=FALSE}
 #show the mean of each gene in each cell line and experimental condition to get a first
 #overview
 data %>%
   group_by(Cell.Line, Gene, Experimental.Condition) %>% 
-  summarise(mean(CT.Value, na.rm = TRUE))
+  summarise(mean(CT.Value, na.rm = TRUE)) %>% 
+  print(n=3)
 ```
 ## Retrieving data variances by cell line
-```{r}
+```{r echo=FALSE}
 #get the data that is affected by the different cell lines
 varianceDataCellLine <- data %>%
   #group the different "sets" of data
@@ -67,9 +74,10 @@ varianceDataCellLine <- data %>%
     #calculate the maximum of the confidence interval for the coefficient of variation
     confIntMaxCellLine = sdCI(CT.Value)$conf.int[2] / meanByCellLine 
   )
+varianceDataCellLine
 ```
 ## Retrieving data variances by experimental condition
-```{r}
+```{r echo=FALSE}
 #get the data that is affected by the different Experimental Conditions
 varianceDataExpCond <- data %>%
   #group the different "sets" of data
@@ -99,18 +107,15 @@ varianceDataExpCond <- data %>%
     #calculate the maximum of the confidence interval for the coefficient of variation
     confIntMaxExpCond = mean(confIntMaxExpCond, na.rm = TRUE) 
   )
-```
-
-```{r echo=FALSE}
-varianceDataCellLine
 varianceDataExpCond
-
 ```
+
 ## Merge the data
-```{r}
-#group all import data in a tibble
+```{r message=FALSE}
+#group all import data into a tibble
 finalData <- merge(varianceDataCellLine, varianceDataExpCond, by = "Gene")
-finalData
+finalData <- as_tibble(finalData)
+print(finalData, n=4)
 ```
 ## Plotting the raw data
 
