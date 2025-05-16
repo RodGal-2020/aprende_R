@@ -20,38 +20,53 @@ library(tidyverse)
 library(conflicted)
 library(ggplot2)
 library(MKinfer)
-library(formatR)
 conflicts_prefer(dplyr::filter)
 conflicts_prefer(dplyr::lag)
 ```
+## Contenido
+- Introducción sobre el proyecto
+- Introducción sobre las herramientas utilizadas
+- Análisis del codigo
+- Análisis de los gráficos
+- Resultados y conclusión
 
-# Introduction
-## Introduction
-- Selection of stably expressed reference genes is crucial for qRT-PCR
-- Proyects objective is finding the most stable genes and distinguishing the influence of cell lines and experimental conditions
-- Dataset of CT values from 4 cell lines, 9 genes, and 3 experimental conditions
-- Final objective: Graphical representation of variances in CT values for each gene based on cell lines and experimental conditions
+# Introducción
+## Introducción sobre el proyecto
+### **Objetivos:**
+- Selección de genes de referencia **estables** es crucial para qRT-PCR
+- Conjunto de datos de valores CT de 4 líneas celulares, 9 genes y 3 condiciones experimentales
+- Encontrar los genes más estables y distinguir la influencia de las líneas celulares y las condiciones experimentales
+- **Objetivo final:**
+  - Representación gráfica de las varianzas en los valores CT para cada gen según las líneas celulares y las condiciones experimentales
 
-# Editing the data
-## First edit of the data
+## Introducción sobre las herramientas utilizadas
+- R: Lenguaje de programación y entorno para análisis estadístico
+- RStudio: IDE para R
+- GitHub: Plataforma para control de versiones y colaboración en proyectos de programación
+- tidyverse: Colección de paquetes para manipulación y visualización de datos
+- ggplot2: Paquete para crear gráficos
+- conflicted: Manejo de conflictos entre funciones de diferentes paquetes
+- MKinfer: Paquete para inferencia estadística
+
+# Analisis del código
+## Primer contacto con los datos
 ```{r message=FALSE}
-#read all data
 data <- read_csv2("GeneDataAllCellLinesNewFormat.csv")
-
 #change the variable names to a usable format in R
 names(data)<-str_replace_all(names(data), c(" " = "."))
-print(data, n=6)
+knitr::kable(data[1:4,])
 ```
-## First overview of the data
+
+## Primer resumen de los datos
 ```{r message=FALSE}
-#show the mean of each gene in each cell line and experimental condition to get a first
-#overview
 data %>%
   group_by(Cell.Line, Gene, Experimental.Condition) %>% 
   summarise(mean(CT.Value, na.rm = TRUE)) %>% 
-  print(n=3)
+  head(n = 4) %>%
+  knitr::kable()
 ```
-## Retrieving data variances by cell line
+
+## Obtener la varianza de los datos por línea celular
 ```{r echo=FALSE}
 #get the data that is affected by the different cell lines
 varianceDataCellLine <- data %>%
@@ -74,9 +89,10 @@ varianceDataCellLine <- data %>%
     #calculate the maximum of the confidence interval for the coefficient of variation
     confIntMaxCellLine = sdCI(CT.Value)$conf.int[2] / meanByCellLine 
   )
-varianceDataCellLine
+knitr::kable(varianceDataCellLine[1:6, 1:5])
 ```
-## Retrieving data variances by experimental condition
+
+## Obtener la varianza de los datos por condiciones experimentales
 ```{r echo=FALSE}
 #get the data that is affected by the different Experimental Conditions
 varianceDataExpCond <- data %>%
@@ -107,26 +123,22 @@ varianceDataExpCond <- data %>%
     #calculate the maximum of the confidence interval for the coefficient of variation
     confIntMaxExpCond = mean(confIntMaxExpCond, na.rm = TRUE) 
   )
-varianceDataExpCond
+knitr::kable(head(varianceDataExpCond))
 ```
-
-## Merge the data
+## Juntar datos obtenidos
 ```{r message=FALSE}
-#group all import data into a tibble
-finalData <- merge(varianceDataCellLine, varianceDataExpCond, by = "Gene")
-finalData <- as_tibble(finalData)
-print(finalData, n=4)
+finalData <- full_join(varianceDataCellLine, varianceDataExpCond, by = "Gene")
+knitr::kable(finalData[1:5, 1:5])
 ```
-## Plotting the raw data
 
+## Graficar los datos
 ```{r}
 ggplot(data = finalData) +
   aes(x = coefficientOfVariationExpCond, y = coefficientOfVariationCellLine, color = Gene) +
   geom_point()
 ```
 
-## Adding error bars
-
+## Añadir barras de error
 ```{r, echo=FALSE}
 ggplot(data = finalData) +
   aes(x = coefficientOfVariationExpCond, y = coefficientOfVariationCellLine, color = Gene) +
@@ -135,9 +147,7 @@ ggplot(data = finalData) +
   geom_errorbar(aes(ymin = confIntMinCellLine, ymax=confIntMaxCellLine), width=.01)
 ```
 
-
-## Optimizing the plot (error bars are too dense for a graphical representation)
-
+## Optimizar el gráfico (las barras de error son demasiado densas para una representación gráfica)
 ```{r, echo=FALSE}
 ggplot(data = finalData) +
   aes(
