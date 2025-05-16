@@ -1,5 +1,5 @@
 ---
-title: "Hypoxic Gene Expression"
+title: "Expresión genética bajo condiciones hipóxicas"
 author: "Jannik Hannemann"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
@@ -65,9 +65,34 @@ data %>%
   head(n = 4) %>%
   knitr::kable()
 ```
+## Importancia de la varianza en el estudio
+- La varianza es una medida de la dispersión de los datos
+- En el contexto de la expresión génica, la varianza puede indicar la estabilidad de un gen como gen de referencia
+- Un gen con baja varianza es más estable y, por lo tanto, es un mejor candidato como gen de referencia
 
-## Obtener la varianza de los datos por línea celular
-```{r echo=FALSE}
+## Obtener la varianza de los datos por líneas celulares
+```{r echo=TRUE, eval=FALSE}
+varianceDataCellLine <- data %>%
+  #group the different "sets" of data
+  group_by(Cell.Line, Gene, Experimental.Condition) %>% 
+  filter(Experimental.Condition == "24h NX") %>% 
+  group_by(Gene) %>% 
+  summarise(
+    #calculate the standard deviation of the CT values for each gene
+    standardDeviationByCellLine = sd(CT.Value, na.rm = TRUE), 
+    #calculate the mean of the CT values for each gene
+    meanByCellLine = mean(CT.Value, na.rm = TRUE), 
+    #calculate the coefficient of variation for each gene
+    coefficientOfVariationCellLine = standardDeviationByCellLine / meanByCellLine, 
+    #calculate the minimum of the confidence interval for the coefficient of variation
+    confIntMinCellLine = sdCI(CT.Value)$conf.int[1] / meanByCellLine, 
+    #calculate the maximum of the confidence interval for the coefficient of variation
+    confIntMaxCellLine = sdCI(CT.Value)$conf.int[2] / meanByCellLine 
+  )
+knitr::kable(varianceDataCellLine[1:6, 1:5])
+```
+## Obtener la varianza de los datos por líneas celulares
+```{r echo=FALSE, eval=TRUE}
 #get the data that is affected by the different cell lines
 varianceDataCellLine <- data %>%
   #group the different "sets" of data
@@ -147,7 +172,7 @@ ggplot(data = finalData) +
   geom_errorbar(aes(ymin = confIntMinCellLine, ymax=confIntMaxCellLine), width=.01)
 ```
 
-## Optimizar el gráfico (las barras de error son demasiado densas para una representación gráfica)
+## Optimizar el gráfico
 ```{r, echo=FALSE}
 ggplot(data = finalData) +
   aes(
@@ -169,3 +194,13 @@ ggplot(data = finalData) +
     title = "Coefficient of variation of the CT-Values for the different analyzed genes"
   )
 ```
+
+## Resultados y conclusión
+- El gráfico muestra la relación entre la varianza de los valores CT por condiciones experimentales y líneas celulares
+- Los genes que están por encima de la línea 1:1 tienen una mayor varianza en las lineas celulares que en las condiciones experimentales
+- Solo el ActB está por debajo de la línea 1:1
+- El TBP es el gen más estable en las condiciones experimentales y también en las líneas celulares
+- Los resultados se publicaron en la siguiente publicación científica:
+  - Hannemann J, Schmidt-Hutten L, Hannemann J, Kleinsang F, Böger R. **Selection of Reference Genes for Normalization of Gene Expression After Exposure of Human Endothelial and Epithelial Cells to Hypoxia.** Int J Mol Sci. 2025 Feb 19;26(4):1763. doi: 10.3390/ijms26041763. PMID: 40004226; PMCID: PMC11855034.
+
+# Gracias por vuestra atención
