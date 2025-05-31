@@ -22,34 +22,53 @@ library(ggplot2)
 library(MKinfer)
 conflicts_prefer(dplyr::filter)
 conflicts_prefer(dplyr::lag)
+
+# presentarse y que es de interno
 ```
+
 ## Contenido
-- Introducción sobre el proyecto
-- Introducción sobre las herramientas utilizadas
-- Análisis del codigo
-- Análisis de los gráficos
-- Resultados y conclusión
+
+-   Conceptos básicos de la expresión genética y la qRT-PCR
+-   Introducción sobre el proyecto
+-   Introducción sobre las herramientas utilizadas
+-   Análisis del codigo
+-   Análisis gráfico
+-   Resultados y conclusión
+
 
 # Introducción
+
+## Conceptos básicos de la expresión genética y la qRT-PCR
+-   **Expresión genética**: Proceso por el cual la información genética se traduce en proteínas
+-   **qRT-PCR**: Técnica para cuantificar la expresión génica mediante la amplificación de ADN mensajero (ARNm)
+-   **CT (Cycle Threshold)**: Número de ciclos necesarios para que la señal de fluorescencia alcance un umbral específico, inversamente proporcional a la cantidad de ARNm presente
+-   **Genes de referencia**: Genes cuya expresión es estable y se utilizan para normalizar los datos de qRT-PCR, permitiendo comparaciones precisas entre muestras
+
 ## Introducción sobre el proyecto
+
 ### **Objetivos:**
-- Selección de genes de referencia **estables** es crucial para qRT-PCR
-- Conjunto de datos de valores CT de 4 líneas celulares, 9 genes y 3 condiciones experimentales
-- Encontrar los genes más estables y distinguir la influencia de las líneas celulares y las condiciones experimentales
-- **Objetivo final:**
-  - Representación gráfica de las varianzas en los valores CT para cada gen según las líneas celulares y las condiciones experimentales
+
+-   Selección de genes de referencia **estables** es crucial para qRT-PCR
+-   Conjunto de datos de valores CT de 4 líneas celulares, 9 genes y 3 condiciones experimentales
+-   Encontrar los genes más estables y distinguir la influencia de las líneas celulares y las condiciones experimentales
+-   **Objetivo final:**
+    -   Analisis grafico de las varianzas en los valores CT para cada gen según las líneas celulares y las condiciones experimentales
 
 ## Introducción sobre las herramientas utilizadas
-- R: Lenguaje de programación y entorno para análisis estadístico
-- RStudio: IDE para R
-- GitHub: Plataforma para control de versiones y colaboración en proyectos de programación
-- tidyverse: Colección de paquetes para manipulación y visualización de datos
-- ggplot2: Paquete para crear gráficos
-- conflicted: Manejo de conflictos entre funciones de diferentes paquetes
-- MKinfer: Paquete para inferencia estadística
+
+-   `R`: Lenguaje de programación y entorno para análisis estadístico
+-   `RStudio`: IDE para R
+-   `GitHub`: Plataforma para control de versiones y colaboración en proyectos de programación
+-   `RMarkdown`: Herramienta para crear documentos dinámicos y reproducibles en R
+-   `tidyverse`: Colección de paquetes para manipulación y visualización de datos
+-   `ggplot2`: Paquete para crear gráficos
+-   `conflicted`: Manejo de conflictos entre funciones de diferentes paquetes
+-   `MKinfer`: Paquete para inferencia estadística
 
 # Analisis del código
+
 ## Primer contacto con los datos
+
 ```{r message=FALSE}
 data <- read_csv2("GeneDataAllCellLinesNewFormat.csv")
 #change the variable names to a usable format in R
@@ -58,40 +77,48 @@ knitr::kable(data[1:4,])
 ```
 
 ## Primer resumen de los datos
+
+Datos: 4 columnas y 648 filas
+
 ```{r message=FALSE}
 data %>%
   group_by(Cell.Line, Gene, Experimental.Condition) %>% 
   summarise(mean(CT.Value, na.rm = TRUE)) %>% 
-  head(n = 4) %>%
+  head(n = 3) %>%
   knitr::kable()
+
 ```
+
 ## Importancia de la varianza en el estudio
-- La varianza es una medida de la dispersión de los datos
-- En el contexto de la expresión génica, la varianza puede indicar la estabilidad de un gen como gen de referencia
-- Un gen con baja varianza es más estable y, por lo tanto, es un mejor candidato como gen de referencia
+
+-   La varianza es una medida de la dispersión de los datos
+-   En el contexto de la expresión génica, la varianza puede indicar la estabilidad de un gen como gen de referencia
+-   Un gen con baja varianza es más estable y, por lo tanto, es un mejor candidato como gen de referencia
+-   Se utiliza el coeficiente de variación (CV) para comparar la varianza relativa entre genes
+
 
 ## Obtener la varianza de los datos por líneas celulares
+
 ```{r echo=TRUE, eval=FALSE}
 varianceDataCellLine <- data %>%
   #group the different "sets" of data
-  group_by(Cell.Line, Gene, Experimental.Condition) %>% 
   filter(Experimental.Condition == "24h NX") %>% 
   group_by(Gene) %>% 
   summarise(
     #calculate the standard deviation of the CT values for each gene
     standardDeviationByCellLine = sd(CT.Value, na.rm = TRUE), 
-    #calculate the mean of the CT values for each gene
     meanByCellLine = mean(CT.Value, na.rm = TRUE), 
     #calculate the coefficient of variation for each gene
     coefficientOfVariationCellLine = standardDeviationByCellLine / meanByCellLine, 
-    #calculate the minimum of the confidence interval for the coefficient of variation
+    #calculate the minimum and maximum of the confidence interval for the coefficient of variation
     confIntMinCellLine = sdCI(CT.Value)$conf.int[1] / meanByCellLine, 
-    #calculate the maximum of the confidence interval for the coefficient of variation
     confIntMaxCellLine = sdCI(CT.Value)$conf.int[2] / meanByCellLine 
   )
-knitr::kable(varianceDataCellLine[1:6, 1:5])
+
 ```
+
 ## Obtener la varianza de los datos por líneas celulares
+
 ```{r echo=FALSE, eval=TRUE}
 #get the data that is affected by the different cell lines
 varianceDataCellLine <- data %>%
@@ -114,10 +141,16 @@ varianceDataCellLine <- data %>%
     #calculate the maximum of the confidence interval for the coefficient of variation
     confIntMaxCellLine = sdCI(CT.Value)$conf.int[2] / meanByCellLine 
   )
-knitr::kable(varianceDataCellLine[1:6, 1:5])
+varianceDataCellLine[1:6, 1:5] %>% 
+  mutate(standardDeviationByCellLine = round(standardDeviationByCellLine, 2)) %>% 
+  mutate(meanByCellLine = round(meanByCellLine, 2)) %>%
+  mutate(coefficientOfVariationCellLine = round(coefficientOfVariationCellLine, 2)) %>%
+  mutate(confIntMinCellLine = round(confIntMinCellLine, 2)) %>%
+  knitr::kable()
 ```
 
 ## Obtener la varianza de los datos por condiciones experimentales
+
 ```{r echo=FALSE}
 #get the data that is affected by the different Experimental Conditions
 varianceDataExpCond <- data %>%
@@ -148,15 +181,22 @@ varianceDataExpCond <- data %>%
     #calculate the maximum of the confidence interval for the coefficient of variation
     confIntMaxExpCond = mean(confIntMaxExpCond, na.rm = TRUE) 
   )
-knitr::kable(head(varianceDataExpCond))
+varianceDataExpCond[1:6,] %>% 
+  mutate(coefficientOfVariationExpCond = round(coefficientOfVariationExpCond, 4)) %>% 
+  mutate(confIntMinExpCond = round(confIntMinExpCond, 2)) %>%
+  mutate(confIntMaxExpCond = round(confIntMaxExpCond, 2)) %>%
+  knitr::kable()
 ```
+
 ## Juntar datos obtenidos
+
 ```{r message=FALSE}
 finalData <- full_join(varianceDataCellLine, varianceDataExpCond, by = "Gene")
 knitr::kable(finalData[1:5, 1:5])
 ```
 
 ## Graficar los datos
+
 ```{r}
 ggplot(data = finalData) +
   aes(x = coefficientOfVariationExpCond, y = coefficientOfVariationCellLine, color = Gene) +
@@ -164,6 +204,7 @@ ggplot(data = finalData) +
 ```
 
 ## Añadir barras de error
+
 ```{r, echo=FALSE}
 ggplot(data = finalData) +
   aes(x = coefficientOfVariationExpCond, y = coefficientOfVariationCellLine, color = Gene) +
@@ -173,6 +214,7 @@ ggplot(data = finalData) +
 ```
 
 ## Optimizar el gráfico
+
 ```{r, echo=FALSE}
 ggplot(data = finalData) +
   aes(
@@ -180,8 +222,8 @@ ggplot(data = finalData) +
     y = coefficientOfVariationCellLine * 100,
     color = Gene
   ) +
-  geom_point() +
-  geom_text(label=finalData$Gene, hjust=0, vjust=0) +
+  geom_point(show.legend = FALSE) +
+  geom_text(label=finalData$Gene, hjust=0, vjust=0, show.legend = FALSE) +
   lims(x = c(0, 7.5), y = c(0, 7.5)) +
   #add a dashed line to show the 1:1 line.
   #Any gene that is under this line means that the
@@ -191,16 +233,30 @@ ggplot(data = finalData) +
   labs(
     x = "The coefficient of variation by experimental conditions in %",
     y = "The coefficient of variation by cell lines in %",
-    title = "Coefficient of variation of the CT-Values for the different analyzed genes"
+    title = "Coefficient of variation of the CT-Values for the different analyzed genes",
   )
 ```
 
 ## Resultados y conclusión
-- El gráfico muestra la relación entre la varianza de los valores CT por condiciones experimentales y líneas celulares
-- Los genes que están por encima de la línea 1:1 tienen una mayor varianza en las lineas celulares que en las condiciones experimentales
-- Solo el ActB está por debajo de la línea 1:1
-- El TBP es el gen más estable en las condiciones experimentales y también en las líneas celulares
-- Los resultados se publicaron en la siguiente publicación científica:
-  - Hannemann J, Schmidt-Hutten L, Hannemann J, Kleinsang F, Böger R. **Selection of Reference Genes for Normalization of Gene Expression After Exposure of Human Endothelial and Epithelial Cells to Hypoxia.** Int J Mol Sci. 2025 Feb 19;26(4):1763. doi: 10.3390/ijms26041763. PMID: 40004226; PMCID: PMC11855034.
+
+-   El gráfico muestra la **relación** entre la varianza de los valores CT por condiciones experimentales y líneas celulares
+-   Los genes que están por encima de la línea y = x tienen una mayor varianza en las lineas celulares que en las condiciones experimentales
+-   Solo el ActB está por debajo de la línea y = x
+-   El TBP es el gen **más estable** en las condiciones experimentales y también en las líneas celulares
+-   Los resultados se publicaron en la siguiente publicación científica:
+    -   Hannemann J, Schmidt-Hutten L, Hannemann J, Kleinsang F, Böger R. **Selection of Reference Genes for Normalization of Gene Expression After Exposure of Human Endothelial and Epithelial Cells to Hypoxia.** Int J Mol Sci. 2025 Feb 19;26(4):1763. doi: 10.3390/ijms26041763. PMID: 40004226; PMCID: PMC11855034.
+
+
+# Agradecimientos
+
+## Agradecimientos
+-   Agradecimientos a la Universidad de Sevilla por los recursos proporcionados
+-   Agradecimientos al Departamento de Ecuaciones Diferenciales y Análisis Numerico por aceptarme como alumno interno
+-   Agradecimientos a la "Klinische Pharmakologie und Toxikologie - UKE" por los datos del proyecto
+-   Agradecimientos a Xopre Rodríguez Gallego por la experiencia de aprendizaje y la oportunidad de presentar este proyecto  
+
+-  ![University of Seville](University-of-Seville.png){#id .class height=120}
+![EDAN](EDAN-Logo.png){#id .class height=120}
+![Klinische Pharmakologie und Toxikologie - UKE](UKE-Logo.svg){#id .class height=120}
 
 # Gracias por vuestra atención
