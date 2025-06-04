@@ -1,27 +1,310 @@
 ---
-title: "Proyecto_Redbull"
+title: "Consumo de Red Bull y frecuencia cardíaca"
 author: "María Vázquez Jiménez"
 date: "`r Sys.Date()`"
-output: html_document
+output: 
+    xaringan::moon_reader:
+      css: "estilos.css"
+      self_contained: yes
 ---
 
 ```{r setup, include=FALSE}
-source(here("scripts/Tablas.R"))
-source(here("scripts/Graficas.R"))
-source(here("scripts/Modelos.R"))
+knitr::opts_chunk$set(
+  cache = TRUE, message = FALSE, warning = FALSE,
+  # Cambiamos el tamaño de las figuras
+  fig.width = 7, fig.height = 5
+  )
+
+library(here)
+
+source(here("C:/Users/Equipo/Desktop/US/INFORMÁTICA/Redbull/scripts/Tablas.R"))
+source(here("C:/Users/Equipo/Desktop/US/INFORMÁTICA/Redbull/scripts/Graficas.R"))
+source(here("C:/Users/Equipo/Desktop/US/INFORMÁTICA/Redbull/scripts/Modelos.R"))
+source(here("C:/Users/Equipo/Desktop/US/INFORMÁTICA/Redbull/scripts/Modelos2.0.R"))
 ```
 
-## Modelos
+## Índice 
+ 
+### - Introducción
+### - Herramientas
+### - Análisis de datos
+### - Modelos
+### - Conclusiones
+---
+<div style="display: flex; justify-content: center; align-items: center; height: 100vh; text-align: center; font-size: 40px; font-weight: bold;">
+Introducción
+</div>
+---
+<div style="text-align: center; align-items: center">
+  <img src="fotoRedBull.png" width="700"/>
+</div>
+---
+<div style="display: flex; justify-content: center; align-items: center; height: 100vh; text-align: center; font-size: 40px; font-weight: bold;">
+Herramientas
+</div>
+---
+## Entorno
+  Lenguaje de programación R
+  
+## Paquetes:
+- **dplyr** <!-- manipular y transformar datos. -->
 
-### Logístico
+- **tidyr** <!-- reorganizar y limpiar datos -->
 
-```{r}
-grafica_logis
+- **ggplot2** <!-- crear gráficas claras y personalizables.-->
+
+- **splines** <!-- interpolación a trozos-->
+
+- **nnet** <!-- realizar regresiones logísticas multinomiales.-->
+
+- **caret** <!-- dividir los datos en conjuntos de entrenamiento y prueba.-->
+
+- **rpart** <!-- construir árboles de decisión.-->
+---
+<div style="display: flex; justify-content: center; align-items: center; height: 100vh; text-align: center; font-size: 40px; font-weight: bold;">
+Análisis de datos
+</div>
+---
+## El conjunto Redbull
+
+Individuos: `r dim(estructura_tabla)[1]`
+ 
+### Variables
+- `Volunteer_ID`
+- `sex`: Male, Female
+- `agegrp`: 35-45, 46-59, 60+  
+- `bp_before`
+- `bp_after`
+---
+```{r, echo = FALSE}
+salida_tablas$estructura_tabla %>%  knitr::kable()
+```
+---
+## Resumen estadístico de los datos
+Función: summary(Tabla)
+```{r, echo = FALSE}
+salida_tablas$resumen_estadistico %>% knitr::kable()
+```
+---
+```{r, echo = FALSE, fig.align = 'left', out.width = "400px"}
+Tabla %>%  
+  ggplot() +
+  geom_density(aes(x = bp_before, fill = agegrp), alpha = 0.5) + 
+  theme_minimal() +
+  theme(
+    axis.line = element_line(color = "black"),       # Ejes X e Y
+    axis.ticks = element_line(color = "black"),      # Pequeñas marcas de los ejes
+    axis.text = element_text(color = "black"),       # Etiquetas de los ejes
+    axis.title = element_text(color = "black")       # Títulos de los ejes, es decir, el nombre de los ejes
+  ) +
+  labs(title = "Frecuencia cardíaca antes",
+       fill = "Edad"  # Cambiar el nombre de la leyenda aquí
+  ) +
+  scale_fill_manual(values = c("#E67E22", "#A7FC00", "#4682B4"))
 ```
 
-Podemos ver que...
-
-```{r}
-salida_modelos$logis$grafica
+```{r, echo = FALSE, fig.align = 'right', out.width = "400px"}
+Tabla %>%  
+  ggplot() +
+  geom_density(aes(x = bp_after, fill = agegrp), alpha = 0.5) + 
+  theme_minimal() +
+  theme(
+    axis.line = element_line(color = "black"),       # Ejes X e Y
+    axis.ticks = element_line(color = "black"),      # Pequeñas marcas de los ejes
+    axis.text = element_text(color = "black"),       # Etiquetas de los ejes
+    axis.title = element_text(color = "black")       # Títulos de los ejes, es decir, el nombre de los ejes
+  ) +
+  labs(title = "Frecuencia cardíaca después",
+       fill = "Edad"  # Cambiar el nombre de la leyenda aquí
+  ) +
+  scale_fill_manual(values = c("#E67E22", "#A7FC00", "#4682B4"))
+```
+---
+## Análisis de los individuos a los que les afecta más
+```{r, echo = FALSE}
+salida_tablas$afecta_mas$seis_primeros %>% knitr::kable()
+```
+---
+### Análisis de los individuos de entre 46-59 años 
+#### Los más afectados de cada sexo
+```{r, echo = FALSE}
+salida_tablas$afecta_mas$rango_edad_y_sexo %>% knitr::kable()
 ```
 
+#### Aquellos cinco individuos más afectados
+```{r, echo = FALSE}
+salida_tablas$afecta_mas$rango_edad_5 %>% knitr::kable()
+```
+---
+####  
+```{r, echo = TRUE, eval = FALSE}
+Tabla %>% 
+  mutate(lpm = case_when( # case_when: función que permite clasificar los datos en rangos.
+    bp_after >= 201 ~ "Crisis",        # Para Crisis (200+) # ~ : asigna el valor a la variable lpm
+    bp_after >= 151 & bp_after < 201 ~ "Severa",  # Para Severa (151-200) 
+    bp_after >= 121 & bp_after < 151 ~ "Moderada", # Para Moderada (121-150)
+    bp_after >= 100 & bp_after < 121 ~ "Leve",     # Para Leve (100-120)
+    TRUE ~ "No Crisis"               # Para No Crisis si no cumple con los rangos # TRUE: si no cumple con ninguna de las condiciones anteriores
+  )) %>%
+  group_by(agegrp, lpm) %>%
+  summarise(n = n(), .groups = "drop") %>% # summarize: función que permite resumir los datos. n: número de individuos. groups: (drop: elimina la agrupación)
+  ggplot(aes(x = agegrp, y = n, fill = lpm)) +
+  geom_bar(stat = "identity", position = "dodge", color = "black") + #stat: tipo de gráfico, position: posición de las barras (dodge: separadas), color: color de los bordes.
+  labs(title = "Frecuencia del nivel de presión areterial",
+       fill = "Nivel de frecuencia cardíaca") + # fill: nombre de la leyenda
+  xlab("Edad") +
+  ylab("Individuos") +
+  theme_minimal() + # Tema de la gráfica
+  theme(
+    axis.line = element_line(color = "black"),       # Ejes X e Y
+    axis.ticks = element_line(color = "black"),      # Pequeñas marcas de los ejes
+    axis.text = element_text(color = "black"),       # Etiquetas de los ejes
+    axis.title = element_text(color = "black")       # Títulos de los ejes, es decir, el nombre de los ejes
+  ) +
+  scale_fill_manual(values = c("No Crisis"= "#00A859", "Leve" = "#FFD700", "Moderada" = "#FF8C00", "Severa" = "#FF4F58", "Crisis" = "#8B0000"))
+```
+---
+####  
+```{r, echo = FALSE, fig.align = 'center', out.width = "700px"}
+Tabla %>% 
+  mutate(lpm = case_when( # case_when: función que permite clasificar los datos en rangos.
+    bp_after >= 201 ~ "Crisis",        # Para Crisis (160+) # ~ : asigna el valor a la variable lpm
+    bp_after >= 151 & bp_after < 201 ~ "Severa",  # Para Severa (140-159) 
+    bp_after >= 121 & bp_after < 151 ~ "Moderada", # Para Moderada (120-139)
+    bp_after >= 100 & bp_after < 121 ~ "Leve",     # Para Leve (100-119)
+    TRUE ~ "No Crisis"               # Para No Crisis si no cumple con los rangos # TRUE: si no cumple con ninguna de las condiciones anteriores
+  )) %>%
+  group_by(agegrp, lpm) %>%
+  summarise(n = n(), .groups = "drop") %>% # summarize: función que permite resumir los datos. n: número de individuos. groups: (drop: elimina la agrupación)
+  ggplot(aes(x = agegrp, y = n, fill = lpm)) +
+  geom_bar(stat = "identity", position = "dodge", color = "black") + #stat: tipo de gráfico, position: posición de las barras (dodge: separadas), color: color de los bordes.
+  labs(title = "Frecuencia del nivel de presión areterial",
+       fill = "Nivel de frecuencia cardíaca") + # fill: nombre de la leyenda
+  xlab("Edad") +
+  ylab("Individuos") +
+  theme_minimal() + # Tema de la gráfica
+  theme(
+    axis.line = element_line(color = "black"),       # Ejes X e Y
+    axis.ticks = element_line(color = "black"),      # Pequeñas marcas de los ejes
+    axis.text = element_text(color = "black"),       # Etiquetas de los ejes
+    axis.title = element_text(color = "black")       # Títulos de los ejes, es decir, el nombre de los ejes
+  ) +
+  scale_fill_manual(values = c("No Crisis"= "#00A859", "Leve" = "#FFD700", "Moderada" = "#FF8C00", "Severa" = "#FF4F58", "Crisis" = "#8B0000"))
+
+```
+---
+<div style="display: flex; justify-content: center; align-items: center; height: 100vh; text-align: center; font-size: 40px; font-weight: bold;">
+Modelos
+</div>
+---
+## Modelo lineal
+  <!-- Asume una relación lineal global entre las variables.  -->
+<!-- Es simple e interpretable, pero puede ser inadecuado si la relación real no es lineal. -->
+<!-- Visto en la carrera -->
+```{r, echo = FALSE, fig.align = 'center', out.width = "600px"}
+salida_modelos$lineal$grafica
+```
+<!-- sobreextimación, pero en general se ajusta bien a los datos. -->
+
+R cuadrado: **0.823** <!-- modelo es bastante bueno  predecir la f.c. después de tomar Red Bull -->
+p-valor: **< 2.2e-16** <!-- indica que los cambios observados en la f.c. tras consumir Red Bull no se deben al azar -->
+---
+####  
+```{r, echo = FALSE, fig.align = 'center', out.width = "700px"}
+salida_modelos$lineal$error
+```
+<!-- lo he creado yo -->
+<!-- categorías creadas por mí, por práctica -->
+---
+## *Splines*
+  <!-- interpolación a trozos  -->
+  <!-- Es más flexible y se adapta mejor a relaciones complejas. -->
+  <!-- no lo he visto en la carrera, pero es interesante -->
+  <!-- no merece la pena meter las variables -->
+```{r, echo = FALSE, fig.align = 'left', out.width = "350px"}
+salida_modelos$splines$grafica1
+```
+
+```{r, echo = FALSE, fig.align = 'right', out.width = "350px"}
+salida_modelos$splines$grafica2
+```
+---
+### Resumen del modelo sin las variables
+R cuadrado: **0.8223** <!-- buen poder predictivo -->
+p-valor: **< 2.2e-16** <!-- p-valor menor a 0.05, podemos decir que los resultados son estadísticamente significativo -->
+
+### Resumen del modelo con las variables
+R cuadrado: **0.8148** <!-- modelo es bastante bueno  predecir la frecuencia cardíaca después de tomar Red Bull -->
+p-valor: **< 2.2e-16** <!-- indica que los cambios observados en la frecuencia cardíaca tras consumir Red Bull no se deben al azar -->
+---
+## Curva de tendencia generada mediante el modelo LOESS 
+<!-- para visualizar el impacto del Redbull según la edad -->
+<!-- Modelo aditivo lineal f.c. antes y después, tiende a ascender ya que al tomar el redbull la f.c. aumenta -->
+<!-- Error en los codos -->
+<!-- Valores alineados = los de abajo los modifican  -->
+
+```{r, echo = TRUE, eval = FALSE}
+Tabla %>% mutate(Edad = agegrp) %>%
+  ggplot() +
+  geom_point(aes(x = bp_before, y = bp_after, color = Edad)) +
+  geom_smooth(aes(x = bp_before, y = bp_after), fill = "#A7D8D8", color = "#A7D8D8") + #línea que muestra la tendencia general de los datos
+  scale_color_manual(values = c("#E67E22", "#A7FC00", "#4682B4")) +  # Colores personalizados para cada grupo de "agegrp"
+  theme_minimal() +
+  theme(
+    axis.line = element_line(color = "black"),       # Ejes X e Y
+    axis.ticks = element_line(color = "black"),      # Pequeñas marcas de los ejes
+    axis.text = element_text(color = "black"),       # Etiquetas de los ejes
+    axis.title = element_text(color = "black")       # Títulos de los ejes, es decir, el nombre de los ejes
+  ) +
+  labs(title = "Efecto del consumo de Red Bull")
+```
+---
+```{r, echo = FALSE, fig.align = 'center', out.width = "700px"}
+salida_graficas$interesantes$recta
+```
+---
+## Árbol de decisión
+<!-- variación cruzada (80% indv), evitando sobreajuste -->
+<div style="text-align: center;">
+  <img src="matriz_confu_arbol.png" width="700"/>
+</div>
+---
+## Matriz de confusión
+```{r, echo = FALSE}
+salida_modelos2.0$arbol$matriz_confu
+```
+
+**Precisión**: 
+```{r, echo = FALSE}
+cat(accuracy, "\n")
+```
+<!-- modelo es capaz de clasificar correctamente el 73% de los casos -->
+---
+## Gráfica de la matriz de confusión
+```{r, echo = FALSE, fig.align = 'center', out.width = "550px"}
+salida_modelos2.0$arbol$grafica
+```
+---
+<div style="display: flex; justify-content: center; align-items: center; height: 100vh; text-align: center; font-size: 40px; font-weight: bold;">
+Conclusiones
+</div>
+---
+### Aprendizaje 
+  Los **hombres de entre 46 y 59 años son los más afectados** 
+
+### Visualización 
+  Los **grupos de entre 46-59 años y mayores de 60 años** son los únicos que **mayor tendencia a presentar crisis hipertensiva**.
+
+  El **modelo lineal y el modelo con splines muestran un ajuste similar** siendo estos los **más precisos** <!-- para explicar cómo influye el Red Bull en la frecuencia cardíaca. -->
+---
+### Modelos
+  Al **añadir las variables de edad y sexo** al modelo con splines, el R² disminuyó ligeramente (R² = 0.8148), lo que sugiere que la inclusión de estas variables **empeora ligeramente** el modelo.
+
+  El **árbol de decisión** tiene **dificultades para predecir la taquicardia severa**, lo que indica que pueden faltar factores importantes en el modelo. La **edad no aporta mucho** y podría estar complicando el análisis. 
+
+### Trabajo Futuro
+  **Sería útil incluir nuevas variables fisiológicas o ciertos hábitos de consumo para mejorar la precisión en futuros estudios**.
+---
+<div style="display: flex; justify-content: center; align-items: center; height: 100vh; text-align: center; font-size: 40px; font-weight: bold;">
+Gracias por vuestra atención
+</div>
