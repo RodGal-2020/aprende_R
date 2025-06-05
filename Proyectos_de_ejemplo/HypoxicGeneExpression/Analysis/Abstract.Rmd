@@ -44,6 +44,10 @@ conflicts_prefer(dplyr::lag)
 -   **CT (Cycle Threshold)**: Número de ciclos necesarios para que la señal de fluorescencia alcance un umbral específico, inversamente proporcional a la cantidad de ARNm presente
 -   **Genes de referencia**: Genes cuya expresión es estable y se utilizan para normalizar los datos de qRT-PCR, permitiendo comparaciones precisas entre muestras
 
+## La qRT-PCR
+![](CTImage.gif){#id .class height=450}  
+Imagen de: *www.thermofisher.com*
+
 ## Introducción sobre el proyecto
 
 ### **Objetivos:**
@@ -52,7 +56,7 @@ conflicts_prefer(dplyr::lag)
 -   Conjunto de datos de valores CT de 4 líneas celulares, 9 genes y 3 condiciones experimentales
 -   Encontrar los genes más estables y distinguir la influencia de las líneas celulares y las condiciones experimentales
 -   **Objetivo final:**
-    -   Analisis grafico de las varianzas en los valores CT para cada gen según las líneas celulares y las condiciones experimentales
+    -   Análisis gráfico de las varianzas en los valores CT para cada gen según las líneas celulares y las condiciones experimentales
 
 ## Introducción sobre las herramientas utilizadas
 
@@ -65,7 +69,7 @@ conflicts_prefer(dplyr::lag)
 -   `conflicted`: Manejo de conflictos entre funciones de diferentes paquetes
 -   `MKinfer`: Paquete para inferencia estadística
 
-# Analisis del código
+# Análisis del código
 
 ## Primer contacto con los datos
 
@@ -91,10 +95,10 @@ data %>%
 
 ## Importancia de la varianza en el estudio
 
--   La varianza es una medida de la dispersión de los datos
--   En el contexto de la expresión génica, la varianza puede indicar la estabilidad de un gen como gen de referencia
+-   La varianza es una medida de la **dispersión** de los datos
+-   En el contexto de la expresión génica, la varianza puede indicar la **estabilidad** de un gen como gen de referencia
 -   Un gen con baja varianza es más estable y, por lo tanto, es un mejor candidato como gen de referencia
--   Se utiliza el coeficiente de variación (CV) para comparar la varianza relativa entre genes
+-   Se utiliza el coeficiente de variación (CV) para comparar la **varianza relativa** entre genes
 
 
 ## Obtener la varianza de los datos por líneas celulares
@@ -240,8 +244,8 @@ ggplot(data = finalData) +
 ## Resultados y conclusión
 
 -   El gráfico muestra la **relación** entre la varianza de los valores CT por condiciones experimentales y líneas celulares
--   Los genes que están por encima de la línea y = x tienen una mayor varianza en las lineas celulares que en las condiciones experimentales
--   Solo el ActB está por debajo de la línea y = x
+-   Los genes que están por encima de la recta y = x tienen una mayor varianza en las lineas celulares que en las condiciones experimentales
+-   Solo el ActB está por debajo de la recta y = x
 -   El TBP es el gen **más estable** en las condiciones experimentales y también en las líneas celulares
 -   Los resultados se publicaron en la siguiente publicación científica:
     -   Hannemann J, Schmidt-Hutten L, Hannemann J, Kleinsang F, Böger R. **Selection of Reference Genes for Normalization of Gene Expression After Exposure of Human Endothelial and Epithelial Cells to Hypoxia.** Int J Mol Sci. 2025 Feb 19;26(4):1763. doi: 10.3390/ijms26041763. PMID: 40004226; PMCID: PMC11855034.
